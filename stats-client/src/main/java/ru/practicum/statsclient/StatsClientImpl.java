@@ -1,8 +1,10 @@
 package ru.practicum.statsclient;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import ru.practicum.statsclient.config.StatsClientConfig;
 import ru.practicum.statsdto.EndpointHitDto;
 import ru.practicum.statsdto.ViewStatsDto;
 import java.time.LocalDateTime;
@@ -13,14 +15,10 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@RequiredArgsConstructor
 public class StatsClientImpl implements StatsClient {
-    private final RestTemplate restTemplate;
-    private final String serverUrl;
-
-    public StatsClientImpl() {
-        this.restTemplate = new RestTemplate();
-        this.serverUrl = "http://localhost:9090";
-    }
+    private final RestTemplate restTemplate = new RestTemplate();
+    private final StatsClientConfig config;
 
     @Override
     public void hit(EndpointHitDto endpointHitDto) {
@@ -28,7 +26,8 @@ public class StatsClientImpl implements StatsClient {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<EndpointHitDto> request = new HttpEntity<>(endpointHitDto, headers);
-        restTemplate.postForEntity(serverUrl + "/hit", request, Void.class);
+        String url = config.getUrl() + "/hit";
+        restTemplate.postForEntity(url, request, Void.class);
     }
 
     @Override
@@ -36,7 +35,7 @@ public class StatsClientImpl implements StatsClient {
                                        LocalDateTime end,
                                        List<String> uris,
                                        boolean unique) {
-        String url = serverUrl + "/stats?start={start}&end={end}&unique={unique}";
+        String baseUrl = config.getUrl() + "/stats?start={start}&end={end}&unique={unique}";
 
         Map<String, Object> params = new HashMap<>();
         params.put("start", start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
@@ -44,12 +43,12 @@ public class StatsClientImpl implements StatsClient {
         params.put("unique", unique);
 
         if (uris != null && !uris.isEmpty()) {
-            url += "&uris={uris}";
+            baseUrl += "&uris={uris}";
             params.put("uris", String.join(",", uris));
         }
 
         ResponseEntity<ViewStatsDto[]> response = restTemplate.getForEntity(
-                url,
+                baseUrl,
                 ViewStatsDto[].class,
                 params
         );

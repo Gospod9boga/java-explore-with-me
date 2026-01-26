@@ -1,13 +1,17 @@
 package ru.practicum.stats.JPA;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "hits")
-@Data
+@Setter
+@Getter
+@ToString(exclude = {"id"})
+@NoArgsConstructor
+@AllArgsConstructor
 public class Hit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
