@@ -1,9 +1,7 @@
 package ru.practicum.mainservice.service;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import ru.practicum.mainservice.dto.request.NewCategoryDto;
 import ru.practicum.mainservice.dto.response.CategoryDto;
-import ru.practicum.mainservice.model.entity.Category;
 
 import java.util.List;
 
