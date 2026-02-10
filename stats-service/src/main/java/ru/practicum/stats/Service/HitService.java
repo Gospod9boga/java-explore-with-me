@@ -1,7 +1,7 @@
 package ru.practicum.stats.Service;
 
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import ru.practicum.stats.JPA.Hit;
 import ru.practicum.stats.Repo.HitRepository;
