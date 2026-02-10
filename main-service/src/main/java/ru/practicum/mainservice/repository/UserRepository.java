@@ -5,7 +5,7 @@ import ru.practicum.mainservice.model.entity.User;
 
 import java.util.List;
 
-public interface UserRepository extends JpaRepository<User,Long> {
+public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existByEmail(String email);
 

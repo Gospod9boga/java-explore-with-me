@@ -4,7 +4,6 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import ru.practicum.mainservice.model.entity.Event;
-
 import java.time.LocalDateTime;
 
 @Data

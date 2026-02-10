@@ -1,0 +1,44 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: main-service
+  
+  datasource:
+    url: jdbc:postgresql://main-db:5432/ewm
+    username: ewm
+    password: ewm
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: false
+  
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+# Статистика
+stats:
+  service:
+    url: http://stats-service:9090
+
+logging:
+  level:
+    ru.practicum: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always

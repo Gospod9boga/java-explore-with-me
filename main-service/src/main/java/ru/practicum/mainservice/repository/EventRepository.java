@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.practicum.mainservice.model.entity.Event;
+
 import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecificationExecutor<Event> {
@@ -16,4 +17,6 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
 
     @Query("SELECT e FROM Event e WHERE e.initiator.id = :userId")
     List<Event> findUserEvents(@Param("userId") Long userId, Pageable pageable);
+
+    boolean existsByCategoryId(Long categoryId);
 }

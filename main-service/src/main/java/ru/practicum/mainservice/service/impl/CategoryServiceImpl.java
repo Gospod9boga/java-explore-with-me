@@ -6,10 +6,12 @@ import org.springframework.stereotype.Service;
 import ru.practicum.mainservice.dto.request.NewCategoryDto;
 import ru.practicum.mainservice.dto.response.CategoryDto;
 import ru.practicum.mainservice.exception.CategoryNameAlreadyExistsException;
+import ru.practicum.mainservice.exception.CategoryNotEmptyException;
 import ru.practicum.mainservice.exception.CategoryNotFoundException;
 import ru.practicum.mainservice.mapper.CategoryMapper;
 import ru.practicum.mainservice.model.entity.Category;
 import ru.practicum.mainservice.repository.CategoryRepository;
+import ru.practicum.mainservice.repository.EventRepository;
 import ru.practicum.mainservice.service.CategoryService;
 
 import java.util.List;
@@ -22,6 +24,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final EventRepository eventRepository; // ДОБАВЬТЕ ЭТО ПОЛЕ
 
     @Override
     public CategoryDto createCategory(NewCategoryDto newCategoryDto) {
@@ -71,20 +74,21 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void deleteCategory(Long catId) {
         log.info("Удаление категории ID: {}", catId);
+        
+        Category category = categoryRepository.findById(catId)
+                .orElseThrow(() -> new CategoryNotFoundException(
+                        "Категория с ID " + catId + " не найдена"
+                ));
 
-        if (!categoryRepository.existsById(catId)) {
-            throw new CategoryNotFoundException(
-                    "Категория с ID " + catId + " не найдена"
+        if (eventRepository.existsByCategoryId(catId)) {
+            throw new CategoryNotEmptyException(
+                    String.format("Нельзя удалить категорию '%s' (ID: %d), так как с ней связаны события",
+                            category.getName(), catId)
             );
         }
 
-        // 2. TODO: Позже добавить проверку на связанные события
-        // if (eventRepository.existsByCategoryId(catId)) {
-        //     throw new CategoryNotEmptyException("Нельзя удалить категорию с событиями");
-        // }
-
-        categoryRepository.deleteById(catId);
-        log.info("Категория ID: {} удалена", catId);
+        categoryRepository.delete(category);
+        log.info("Категория '{}' (ID: {}) удалена", category.getName(), catId);
     }
 
     @Override

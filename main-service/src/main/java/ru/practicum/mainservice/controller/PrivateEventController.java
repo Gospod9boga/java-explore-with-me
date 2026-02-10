@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.controller.privateapi;
+package ru.practicum.mainservice.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +17,7 @@ import ru.practicum.mainservice.service.RequestService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+
 import java.util.List;
 
 @Slf4j

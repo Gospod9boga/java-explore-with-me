@@ -1,4 +1,7 @@
+version: '3.8'
+
 services:
+
   stats-db:
     image: postgres:16.1
     container_name: stats-db
@@ -15,9 +18,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - ewm-network
+
 
   stats-server:
-    build: ./stats-service
+    build:
+      context: .
+      dockerfile: stats-service/Dockerfile
     container_name: stats-server
     ports:
       - "9090:9090"
@@ -29,15 +37,55 @@ services:
       SPRING_DATASOURCE_USERNAME: stats
       SPRING_DATASOURCE_PASSWORD: stats
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    networks:
+      - ewm-network
 
-  ewm-service:
-    image: alpine:latest
-    command: ["echo", "Main service placeholder"]
-    profiles: ["disabled"]
 
   ewm-db:
     image: postgres:16.1
-    profiles: ["disabled"]
+    container_name: ewm-db
+    environment:
+      POSTGRES_DB: ewm
+      POSTGRES_USER: ewm
+      POSTGRES_PASSWORD: ewm
+    ports:
+      - "6542:5432"
+    volumes:
+      - ewm-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ewm"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ewm-network
+
+
+  ewm-service:
+    build:
+      context: .
+      dockerfile: main-service/Dockerfile
+    container_name: ewm-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      ewm-db:
+        condition: service_healthy
+      stats-server:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ewm-db:5432/ewm
+      SPRING_DATASOURCE_USERNAME: ewm
+      SPRING_DATASOURCE_PASSWORD: ewm
+      STATS_SERVICE_URL: http://stats-server:9090
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    networks:
+      - ewm-network
 
 volumes:
   stats-db-data:
+  ewm-db-data:
+
+networks:
+  ewm-network:
+    driver: bridge
