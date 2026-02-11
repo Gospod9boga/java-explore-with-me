@@ -2,7 +2,6 @@ package ru.practicum.statsclient;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.practicum.statsclient.config.StatsClientConfig;
