@@ -1,5 +1,6 @@
 package ru.practicum.mainservice.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import ru.practicum.mainservice.model.enums.EventState;
 
@@ -13,6 +14,7 @@ public class EventFullDto {
     private Long confirmedRequests;
     private LocalDateTime createdOn;
     private String description;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
     private UserShortDto initiator;
     private Location location;

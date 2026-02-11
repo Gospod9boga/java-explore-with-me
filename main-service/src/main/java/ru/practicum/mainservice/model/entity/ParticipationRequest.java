@@ -1,5 +1,6 @@
 package ru.practicum.mainservice.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 import ru.practicum.mainservice.model.enums.RequestStatus;
@@ -20,6 +21,7 @@ public class ParticipationRequest {
     private Long id;
 
     @Column(name = "created")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime created;
 
     @ManyToOne(fetch = FetchType.LAZY)
