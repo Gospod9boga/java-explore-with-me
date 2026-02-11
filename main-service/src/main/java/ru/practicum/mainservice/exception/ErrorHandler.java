@@ -205,6 +205,18 @@ public class ErrorHandler {
         );
     }
 
+    @ExceptionHandler(RequestValidationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, String> handleRequestValidation(RequestValidationException ex) {
+        log.error("Request validation error: {}", ex.getMessage());
+        return Map.of(
+                "status", "CONFLICT",
+                "reason", "Integrity constraint has been violated.",
+                "message", ex.getMessage(),
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, String> handleOtherExceptions(Exception ex) {
@@ -212,18 +224,6 @@ public class ErrorHandler {
         return Map.of(
                 "status", "INTERNAL_SERVER_ERROR",
                 "reason", "Error occurred",
-                "message", ex.getMessage(),
-                "timestamp", LocalDateTime.now().toString()
-        );
-    }
-
-    @ExceptionHandler(RequestValidationException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)  // 409 Conflict
-    public Map<String, String> handleRequestValidation(RequestValidationException ex) {
-        log.error("Request validation error: {}", ex.getMessage());
-        return Map.of(
-                "status", "CONFLICT",
-                "reason", "Integrity constraint has been violated.",
                 "message", ex.getMessage(),
                 "timestamp", LocalDateTime.now().toString()
         );
