@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class StatsClientConfig {
-    private String host = "localhost";
+    private String host = "stats-server";
     private int port = 9090;
 
     public String getUrl() {
