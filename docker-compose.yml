@@ -20,7 +20,7 @@ services:
     build: ./stats-service
     container_name: stats-server
     ports:
-      - "9090:9090"
+      - "9090:8080"
     depends_on:
       stats-db:
         condition: service_healthy
@@ -29,8 +29,7 @@ services:
       SPRING_DATASOURCE_USERNAME: stats
       SPRING_DATASOURCE_PASSWORD: stats
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-     
-      SERVER_PORT: 9090
+
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9090/actuator/health"]
