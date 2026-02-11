@@ -97,74 +97,122 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(UserNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleNotFound(RuntimeException e) {
-        log.error("Not found: {}", e.getMessage());
+    public Map<String, String> handleUserNotFound(UserNotFoundException ex) {
+        log.error("User not found: {}", ex.getMessage());
         return Map.of(
                 "status", "NOT_FOUND",
                 "reason", "The required object was not found.",
-                "message", e.getMessage(),
+                "message", ex.getMessage(),
                 "timestamp", LocalDateTime.now().toString()
         );
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public Map<String, String> handleConflict(final RuntimeException e) {
-        log.error("Conflict: {}", e.getMessage());
+    @ExceptionHandler(CategoryNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleCategoryNotFound(CategoryNotFoundException ex) {
+        log.error("Category not found: {}", ex.getMessage());
         return Map.of(
-                "status", "CONFLICT",
-                "reason", "Integrity constraint has been violated.",
-                "message", e.getMessage(),
+                "status", "NOT_FOUND",
+                "reason", "The required object was not found.",
+                "message", ex.getMessage(),
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
+
+    @ExceptionHandler(EventNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleEventNotFound(EventNotFoundException ex) {
+        log.error("Event not found: {}", ex.getMessage());
+        return Map.of(
+                "status", "NOT_FOUND",
+                "reason", "The required object was not found.",
+                "message", ex.getMessage(),
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
+
+    @ExceptionHandler(CompilationNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleCompilationNotFound(CompilationNotFoundException ex) {
+        log.error("Compilation not found: {}", ex.getMessage());
+        return Map.of(
+                "status", "NOT_FOUND",
+                "reason", "The required object was not found.",
+                "message", ex.getMessage(),
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
+
+    @ExceptionHandler(RequestNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleRequestNotFound(RequestNotFoundException ex) {
+        log.error("Request not found: {}", ex.getMessage());
+        return Map.of(
+                "status", "NOT_FOUND",
+                "reason", "The required object was not found.",
+                "message", ex.getMessage(),
                 "timestamp", LocalDateTime.now().toString()
         );
     }
 
     @ExceptionHandler(CategoryNotEmptyException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public Map<String, String> handleCategoryNotEmpty(CategoryNotEmptyException e) {
-        log.error("Category not empty: {}", e.getMessage());
+    public Map<String, String> handleCategoryNotEmpty(CategoryNotEmptyException ex) {
+        log.error("Category not empty: {}", ex.getMessage());
         return Map.of(
                 "status", "CONFLICT",
                 "reason", "Category has related events.",
-                "message", e.getMessage(),
+                "message", ex.getMessage(),
                 "timestamp", LocalDateTime.now().toString()
         );
     }
 
     @ExceptionHandler(CategoryNameAlreadyExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public Map<String, String> handleCategoryNameExists(CategoryNameAlreadyExistsException e) {
-        log.error("Category name exists: {}", e.getMessage());
+    public Map<String, String> handleCategoryNameExists(CategoryNameAlreadyExistsException ex) {
+        log.error("Category name exists: {}", ex.getMessage());
         return Map.of(
                 "status", "CONFLICT",
                 "reason", "Category name already exists.",
-                "message", e.getMessage(),
+                "message", ex.getMessage(),
                 "timestamp", LocalDateTime.now().toString()
         );
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public Map<String, String> handleEmailExists(EmailAlreadyExistsException e) {
-        log.error("Email exists: {}", e.getMessage());
+    public Map<String, String> handleEmailExists(EmailAlreadyExistsException ex) {
+        log.error("Email exists: {}", ex.getMessage());
         return Map.of(
                 "status", "CONFLICT",
                 "reason", "Email already exists.",
-                "message", e.getMessage(),
+                "message", ex.getMessage(),
                 "timestamp", LocalDateTime.now().toString()
         );
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(EventAccessDeniedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, String> handleEventAccessDenied(EventAccessDeniedException ex) {
+        log.error("Event access denied: {}", ex.getMessage());
+        return Map.of(
+                "status", "CONFLICT",
+                "reason", "Event access denied.",
+                "message", ex.getMessage(),
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
+
+    @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> handleOtherExceptions(Exception e) {
-        log.error("Internal server error: {}", e.getMessage(), e);
+    public Map<String, String> handleOtherExceptions(Exception ex) {
+        log.error("Internal server error: {}", ex.getMessage(), ex);
         return Map.of(
                 "status", "INTERNAL_SERVER_ERROR",
                 "reason", "Error occurred",
-                "message", e.getMessage(),
+                "message", ex.getMessage(),
                 "timestamp", LocalDateTime.now().toString()
         );
     }
