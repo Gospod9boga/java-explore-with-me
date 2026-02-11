@@ -80,6 +80,13 @@ public class RequestServiceImpl implements RequestService {
         ParticipationRequest savedRequest = requestRepository.save(request);
         log.info("Заявка создана с ID: {}, статус: {}", savedRequest.getId(), savedRequest.getStatus());
 
+        if (status == RequestStatus.CONFIRMED) {
+            event.setConfirmedRequests(event.getConfirmedRequests() + 1);
+            eventRepository.save(event);
+            log.info("Обновлен счетчик подтвержденных заявок для события ID: {}, новое значение: {}",
+                    eventId, event.getConfirmedRequests());
+        }
+
         return requestMapper.toParticipationRequestDto(savedRequest);
     }
 
@@ -205,6 +212,17 @@ public class RequestServiceImpl implements RequestService {
             request.setStatus(newStatus);
         }
         List<ParticipationRequest> updatedRequests = requestRepository.saveAll(requests);
+
+        if (newStatus == RequestStatus.CONFIRMED) {
+            long confirmedCount = updatedRequests.stream()
+                    .filter(r -> r.getStatus() == RequestStatus.CONFIRMED)
+                    .count();
+
+            event.setConfirmedRequests(event.getConfirmedRequests() + confirmedCount);
+            eventRepository.save(event);
+            log.info("Обновлен счетчик подтвержденных заявок для события ID: {}, новое значение: {}",
+                    eventId, event.getConfirmedRequests());
+        }
 
         if (newStatus == RequestStatus.CONFIRMED && event.getParticipantLimit() > 0) {
             Long confirmedCount = requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);

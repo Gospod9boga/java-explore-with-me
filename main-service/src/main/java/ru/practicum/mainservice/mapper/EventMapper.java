@@ -74,7 +74,7 @@ public class EventMapper {
         return Event.builder()
                 .annotation(newEventDto.getAnnotation())
                 .category(category)
-                .confirmedRequests(0L)
+                .confirmedRequests(0L)  // ✅ При создании - 0
                 .createdOn(LocalDateTime.now())
                 .description(newEventDto.getDescription())
                 .eventDate(newEventDto.getEventDate())
@@ -94,7 +94,6 @@ public class EventMapper {
             return;
         }
 
-        // Обновляем только те поля, которые не null в запросе
         if (request.getAnnotation() != null) {
             event.setAnnotation(request.getAnnotation());
         }
@@ -126,6 +125,7 @@ public class EventMapper {
         if (request.getTitle() != null) {
             event.setTitle(request.getTitle());
         }
+
     }
 
     public void updateEventFromAdminRequest(UpdateEventAdminRequest request, Event event) {
@@ -133,7 +133,6 @@ public class EventMapper {
             return;
         }
 
-        // Обновляем только те поля, которые не null в запросе
         if (request.getAnnotation() != null) {
             event.setAnnotation(request.getAnnotation());
         }
@@ -165,6 +164,7 @@ public class EventMapper {
         if (request.getTitle() != null) {
             event.setTitle(request.getTitle());
         }
+
     }
 
     private EventFullDto.Location toLocationDto(Event.Location location) {
