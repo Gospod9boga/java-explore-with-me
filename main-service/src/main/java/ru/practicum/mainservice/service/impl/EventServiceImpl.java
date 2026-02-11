@@ -76,8 +76,18 @@ public class EventServiceImpl implements EventService {
         Pageable pageable = createPageable(from, size);
         List<Event> events = eventRepository.findAllByInitiatorId(userId, pageable);
 
+        List<Long> eventIds = events.stream()
+                .map(Event::getId)
+                .collect(Collectors.toList());
+
+        Map<Long, Long> viewsMap = getViews(eventIds);
+
         return events.stream()
-                .map(eventMapper::toEventShortDto)
+                .map(event -> {
+                    EventShortDto dto = eventMapper.toEventShortDto(event);
+                    dto.setViews(viewsMap.getOrDefault(event.getId(), 0L));
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -96,7 +106,12 @@ public class EventServiceImpl implements EventService {
             throw new EventAccessDeniedException("Событие не принадлежит пользователю");
         }
 
-        return eventMapper.toEventFullDto(event);
+        EventFullDto dto = eventMapper.toEventFullDto(event);
+
+        Map<Long, Long> viewsMap = getViews(Collections.singletonList(eventId));
+        dto.setViews(viewsMap.getOrDefault(eventId, 0L));
+
+        return dto;
     }
 
     @Override
@@ -158,8 +173,18 @@ public class EventServiceImpl implements EventService {
 
         List<Event> events = eventRepository.findAll(spec, pageable).getContent();
 
+        List<Long> eventIds = events.stream()
+                .map(Event::getId)
+                .collect(Collectors.toList());
+
+        Map<Long, Long> viewsMap = getViews(eventIds);
+
         return events.stream()
-                .map(eventMapper::toEventFullDto)
+                .map(event -> {
+                    EventFullDto dto = eventMapper.toEventFullDto(event);
+                    dto.setViews(viewsMap.getOrDefault(event.getId(), 0L));
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -190,7 +215,12 @@ public class EventServiceImpl implements EventService {
         Event updatedEvent = eventRepository.save(event);
         log.info("Событие ID: {} обновлено администратором", eventId);
 
-        return eventMapper.toEventFullDto(updatedEvent);
+        EventFullDto dto = eventMapper.toEventFullDto(updatedEvent);
+
+        Map<Long, Long> viewsMap = getViews(Collections.singletonList(eventId));
+        dto.setViews(viewsMap.getOrDefault(eventId, 0L));
+
+        return dto;
     }
 
     @Override
@@ -213,9 +243,11 @@ public class EventServiceImpl implements EventService {
         Pageable pageable = createPageable(from, size);
         List<Event> events = eventRepository.findAll(spec, pageable).getContent();
 
-        Map<Long, Long> viewsMap = getViews(events.stream()
+        List<Long> eventIds = events.stream()
                 .map(Event::getId)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
+
+        Map<Long, Long> viewsMap = getViews(eventIds);
 
         List<EventShortDto> dtos = events.stream()
                 .map(event -> {
@@ -232,6 +264,15 @@ public class EventServiceImpl implements EventService {
         }
 
         return dtos;
+    }
+
+    @Override
+    public List<EventShortDto> getPublicEvents(String text, List<Long> categories, Boolean paid,
+                                               LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                               Boolean onlyAvailable, String sort,
+                                               int from, int size) {
+
+        return getPublicEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, null);
     }
 
     @Override
@@ -259,17 +300,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> getPublicEvents(String text, List<Long> categories, Boolean paid,
-                                               LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                               Boolean onlyAvailable, String sort,
-                                               int from, int size) {
-
-        return getPublicEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, null);
-    }
-
-    @Override
     public EventFullDto getPublicEventById(Long eventId) {
-
         return getPublicEventById(eventId, null);
     }
 
@@ -407,7 +438,7 @@ public class EventServiceImpl implements EventService {
                     .timestamp(LocalDateTime.now())
                     .build();
 
-            statsClient.hit(hit);  // Изменил с saveHit на hit
+            statsClient.hit(hit);
             log.debug("Статистика сохранена: {}", hit);
         } catch (Exception e) {
             log.error("Ошибка при сохранении статистики: {}", e.getMessage());
