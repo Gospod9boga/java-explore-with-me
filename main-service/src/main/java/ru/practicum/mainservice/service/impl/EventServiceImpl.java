@@ -410,7 +410,7 @@ public class EventServiceImpl implements EventService {
         switch (stateAction) {
             case "PUBLISH_EVENT":
                 if (event.getState() != EventState.PENDING) {
-                    throw new EventValidationException("Можно публиковать только события в состоянии PENDING");
+                    throw new EventAccessDeniedException("Нельзя публиковать событие в статусе: " + event.getState());
                 }
                 if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
                     throw new EventValidationException("Нельзя публиковать событие, которое начинается менее чем через час");
@@ -420,7 +420,7 @@ public class EventServiceImpl implements EventService {
                 break;
             case "REJECT_EVENT":
                 if (event.getState() == EventState.PUBLISHED) {
-                    throw new EventValidationException("Нельзя отклонить уже опубликованное событие");
+                    throw new EventAccessDeniedException("Нельзя отклонить уже опубликованное событие");
                 }
                 event.setState(EventState.CANCELED);
                 break;
