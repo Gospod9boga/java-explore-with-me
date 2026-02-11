@@ -1,9 +1,9 @@
 package ru.practicum.mainservice.service.impl;
 
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.mainservice.dto.response.ParticipationRequestDto;
 import ru.practicum.mainservice.exception.*;
 import ru.practicum.mainservice.mapper.RequestMapper;
@@ -84,6 +84,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getUserRequests(Long userId) {
         log.info("Получение заявок пользователя ID: {}", userId);
 
@@ -99,6 +100,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
         log.info("Отмена заявки ID: {} пользователем ID: {}", requestId, userId);
 
@@ -116,6 +118,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
         log.info("Получение заявок на событие ID: {} пользователем ID: {}", eventId, userId);
 
@@ -134,6 +137,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional
     public EventRequestStatusUpdateResult updateRequestStatuses(
             Long userId, Long eventId, List<Long> requestIds, String status) {
 
@@ -246,5 +250,4 @@ public class RequestServiceImpl implements RequestService {
 
         return new EventRequestStatusUpdateResult(confirmed, rejected);
     }
-
 }
