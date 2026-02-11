@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   stats-db:
     image: postgres:16.1
@@ -15,38 +17,78 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - ewm-network
 
   stats-server:
-    build: ./stats-service
+    build:
+      context: .
+      dockerfile: stats-service/Dockerfile
     container_name: stats-server
     ports:
-      - "9090:8080"
+      - "9090:9090"
     depends_on:
       stats-db:
         condition: service_healthy
     environment:
-      SERVER_PORT: 8080
       SPRING_DATASOURCE_URL: jdbc:postgresql://stats-db:5432/stats
       SPRING_DATASOURCE_USERNAME: stats
       SPRING_DATASOURCE_PASSWORD: stats
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-
-
+    networks:
+      - ewm-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9090/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 30
-      start_period: 60s
-
-  ewm-service:
-    image: alpine:latest
-    command: ["echo", "Main service placeholder"]
-    profiles: ["disabled"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   ewm-db:
     image: postgres:16.1
-    profiles: ["disabled"]
+    container_name: ewm-db
+    environment:
+      POSTGRES_DB: ewm
+      POSTGRES_USER: ewm
+      POSTGRES_PASSWORD: ewm
+    ports:
+      - "6542:5432"
+    volumes:
+      - ewm-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ewm"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ewm-network
+
+  ewm-service:
+    build:
+      context: .
+      dockerfile: main-service/Dockerfile
+    container_name: ewm-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      ewm-db:
+        condition: service_healthy
+      stats-server:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ewm-db:5432/ewm
+      SPRING_DATASOURCE_USERNAME: ewm
+      SPRING_DATASOURCE_PASSWORD: ewm
+      STATS_SERVICE_URL: http://stats-server:9090
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_SQL_INIT_MODE: never
+    networks:
+      - ewm-network
 
 volumes:
   stats-db-data:
+  ewm-db-data:
+
+networks:
+  ewm-network:
+    driver: bridge
