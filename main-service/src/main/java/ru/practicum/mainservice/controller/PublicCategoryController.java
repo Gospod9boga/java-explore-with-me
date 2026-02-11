@@ -5,11 +5,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-        import ru.practicum.mainservice.dto.response.CategoryDto;
+import ru.practicum.mainservice.dto.response.CategoryDto;
 import ru.practicum.mainservice.service.CategoryService;
 
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+
 import java.util.List;
 
 @Slf4j

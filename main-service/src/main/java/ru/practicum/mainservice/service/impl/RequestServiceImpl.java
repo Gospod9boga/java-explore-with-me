@@ -1,5 +1,6 @@
 package ru.practicum.mainservice.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class RequestServiceImpl implements RequestService {
     private final RequestMapper requestMapper;
 
     @Override
+    @Transactional
     public ParticipationRequestDto createRequest(Long userId, Long eventId) {
         log.info("Создание заявки пользователем ID: {} на событие ID: {}", userId, eventId);
 
@@ -52,24 +54,31 @@ public class RequestServiceImpl implements RequestService {
             throw new RequestValidationException("Нельзя добавить повторный запрос");
         }
 
-        Long confirmedRequests = requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
-        if (event.getParticipantLimit() > 0 && confirmedRequests >= event.getParticipantLimit()) {
-            throw new RequestValidationException("Достигнут лимит участников");
+        RequestStatus status;
+        if (event.getParticipantLimit() == 0) {
+            status = RequestStatus.CONFIRMED;
+        } else {
+            Long confirmedRequests = requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
+            if (confirmedRequests >= event.getParticipantLimit()) {
+                throw new RequestValidationException("Достигнут лимит участников");
+            }
+
+            if (event.getRequestModeration()) {
+                status = RequestStatus.PENDING;
+            } else {
+                status = RequestStatus.CONFIRMED;
+            }
         }
 
         ParticipationRequest request = ParticipationRequest.builder()
                 .created(LocalDateTime.now())
                 .event(event)
                 .requester(requester)
-                .status(RequestStatus.PENDING)
+                .status(status)
                 .build();
 
-        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
-            request.setStatus(RequestStatus.CONFIRMED);
-        }
-
         ParticipationRequest savedRequest = requestRepository.save(request);
-        log.info("Заявка создана с ID: {}", savedRequest.getId());
+        log.info("Заявка создана с ID: {}, статус: {}", savedRequest.getId(), savedRequest.getStatus());
 
         return requestMapper.toParticipationRequestDto(savedRequest);
     }

@@ -1,5 +1,6 @@
 package ru.practicum.mainservice.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import ru.practicum.mainservice.model.entity.Event;
@@ -22,6 +23,7 @@ public class NewEventDto {
 
     @NotNull(message = "Event date cannot be null")
     @Future(message = "Event date must be in the future")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
 
     @NotNull(message = "Location cannot be null")
