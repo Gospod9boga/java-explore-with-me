@@ -127,7 +127,7 @@ public class EventServiceImpl implements EventService {
         }
 
         if (event.getState() != EventState.PENDING && event.getState() != EventState.CANCELED) {
-            throw new EventValidationException("Можно редактировать только события в состоянии PENDING или CANCELED");
+            throw new EventAccessDeniedException("Можно редактировать только события в состоянии PENDING или CANCELED");
         }
 
         if (request.getEventDate() != null) {
