@@ -216,4 +216,16 @@ public class ErrorHandler {
                 "timestamp", LocalDateTime.now().toString()
         );
     }
+
+    @ExceptionHandler(RequestValidationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)  // 409 Conflict
+    public Map<String, String> handleRequestValidation(RequestValidationException ex) {
+        log.error("Request validation error: {}", ex.getMessage());
+        return Map.of(
+                "status", "CONFLICT",
+                "reason", "Integrity constraint has been violated.",
+                "message", ex.getMessage(),
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
 }

@@ -1,5 +1,6 @@
 package ru.practicum.mainservice.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -45,6 +46,7 @@ public class Event {
 
     @NotNull(message = "Event date cannot be null")
     @Column(name = "event_date", nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
 
     @NotNull(message = "Initiator cannot be null")
