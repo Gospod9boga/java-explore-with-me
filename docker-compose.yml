@@ -22,7 +22,7 @@ services:
 
   stats-server:
     build:
-      context: .
+      context: ./stats-service
       dockerfile: stats-service/Dockerfile
     container_name: stats-server
     ports:
@@ -65,7 +65,7 @@ services:
 
   ewm-service:
     build:
-      context: .
+      context: ./main-service
       dockerfile: main-service/Dockerfile
     container_name: ewm-service
     ports:
