@@ -1,6 +1,5 @@
 package ru.practicum.mainservice.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -10,6 +9,7 @@ import ru.practicum.mainservice.dto.response.EventFullDto;
 import ru.practicum.mainservice.dto.response.EventShortDto;
 import ru.practicum.mainservice.service.EventService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;

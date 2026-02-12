@@ -112,7 +112,15 @@ public class EventMapper {
         }
 
         if (request.getParticipantLimit() != null) {
-            event.setParticipantLimit(Integer.parseInt(request.getParticipantLimit()));
+            try {
+                int limit = Integer.parseInt(request.getParticipantLimit());
+                if (limit < 0) {
+                    throw new IllegalArgumentException("Participant limit must be positive or zero");
+                }
+                event.setParticipantLimit(limit);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid participant limit format");
+            }
         }
 
         if (request.getRequestModeration() != null) {
@@ -146,7 +154,15 @@ public class EventMapper {
         }
 
         if (request.getParticipantLimit() != null) {
-            event.setParticipantLimit(Integer.parseInt(request.getParticipantLimit()));
+            try {
+                int limit = Integer.parseInt(request.getParticipantLimit());
+                if (limit < 0) {
+                    throw new IllegalArgumentException("Participant limit must be positive or zero");
+                }
+                event.setParticipantLimit(limit);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid participant limit format");
+            }
         }
 
         if (request.getRequestModeration() != null) {
