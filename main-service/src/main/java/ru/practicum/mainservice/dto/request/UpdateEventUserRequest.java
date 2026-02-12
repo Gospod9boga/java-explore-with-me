@@ -1,6 +1,5 @@
 package ru.practicum.mainservice.dto.request;
 
-import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -18,9 +17,10 @@ public class UpdateEventUserRequest {
 
     private LocalDateTime eventDate;
 
+    private Object location;
+
     private String paid;
 
-    @PositiveOrZero(message = "Participant limit must be positive or zero")
     private String participantLimit;
 
     private String requestModeration;
