@@ -10,10 +10,9 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class StatsClientConfig {
-    private String host = "stats-server";
-    private int port = 9090;
+    private String url = "http://stats-server:9090";
 
     public String getUrl() {
-        return String.format("http://%s:%d", host, port);
+        return url;
     }
 }
