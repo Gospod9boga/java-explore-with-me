@@ -170,7 +170,6 @@ public class EventMapper {
         }
     }
 
-
     private EventFullDto.Location toLocationDto(Event.Location location) {
         if (location == null) {
             return null;

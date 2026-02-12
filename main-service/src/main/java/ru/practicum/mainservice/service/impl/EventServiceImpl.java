@@ -231,6 +231,10 @@ public class EventServiceImpl implements EventService {
 
         log.info("Публичный поиск событий: text={}, categories={}, paid={}", text, categories, paid);
 
+        if (rangeStart != null && rangeEnd != null && rangeEnd.isBefore(rangeStart)) {
+            throw new EventValidationException("rangeEnd must be after rangeStart");
+        }
+
         if (request != null) {
             saveHit(request);
         }
@@ -288,6 +292,8 @@ public class EventServiceImpl implements EventService {
 
         if (request != null) {
             saveHit(request);
+            event.setViews(event.getViews() + 1);
+            eventRepository.save(event);
         }
 
         Map<Long, Long> viewsMap = getViews(Collections.singletonList(eventId));
