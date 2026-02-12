@@ -1,7 +1,6 @@
 package ru.practicum.stats.Controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.stats.Service.HitService;
@@ -10,6 +9,8 @@ import ru.practicum.statsdto.EndpointHitDto;
 import ru.practicum.statsdto.ViewStatsDto;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @RestController
@@ -18,6 +19,7 @@ import java.util.List;
 public class StatsController {
     private final HitService hitService;
     private final StatsService statsService;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public StatsController(HitService hitService, StatsService statsService) {
         this.hitService = hitService;
@@ -33,17 +35,30 @@ public class StatsController {
 
     @GetMapping("/stats")
     public List<ViewStatsDto> getStats(
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
+            @RequestParam String start,
+            @RequestParam String end,
             @RequestParam(required = false) List<String> uris,
             @RequestParam(defaultValue = "false") boolean unique) {
 
         log.info("Запрос статистики: start={}, end={}, uris={}, unique={}", start, end, uris, unique);
+        
+        String cleanStart = start.replace("%20", " ").replace("+", " ");
+        String cleanEnd = end.replace("%20", " ").replace("+", " ");
 
-        if (end.isBefore(start)) {
+        LocalDateTime startTime;
+        LocalDateTime endTime;
+
+        try {
+            startTime = LocalDateTime.parse(cleanStart, FORMATTER);
+            endTime = LocalDateTime.parse(cleanEnd, FORMATTER);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Неверный формат даты. Ожидается: yyyy-MM-dd HH:mm:ss", e);
+        }
+
+        if (endTime.isBefore(startTime)) {
             throw new IllegalArgumentException("End date must be after start date");
         }
 
-        return statsService.getStats(start, end, uris, unique);
+        return statsService.getStats(startTime, endTime, uris, unique);
     }
 }
