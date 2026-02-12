@@ -29,7 +29,6 @@ CREATE TABLE IF NOT EXISTS events (
     request_moderation BOOLEAN DEFAULT true,
     state VARCHAR(20) NOT NULL,
     title VARCHAR(120) NOT NULL,
-    views BIGINT DEFAULT 0
 );
 
 

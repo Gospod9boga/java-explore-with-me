@@ -46,6 +46,8 @@ public class EventServiceImpl implements EventService {
     private final StatsClient statsClient;
 
     private static final String APP_NAME = "ewm-main-service";
+    private static final LocalDateTime STATS_START = LocalDateTime.of(2020, 1, 1, 0, 0);
+    private static final LocalDateTime STATS_END = LocalDateTime.of(2035, 1, 1, 0, 0);
 
     @Override
     @Transactional
@@ -61,8 +63,6 @@ public class EventServiceImpl implements EventService {
         validateEventDate(newEventDto.getEventDate(), 2, "Дата события должна быть не ранее чем через 2 часа от текущего момента");
 
         Event event = eventMapper.toEvent(newEventDto, initiator, category);
-        event.setViews(0L);
-
         Event savedEvent = eventRepository.save(event);
         log.info("Событие создано с ID: {}", savedEvent.getId());
 
@@ -87,7 +87,7 @@ public class EventServiceImpl implements EventService {
                 .map(Event::getId)
                 .collect(Collectors.toList());
 
-        Map<Long, Long> viewsMap = getViews(eventIds);
+        Map<Long, Long> viewsMap = getAllViews(eventIds);
 
         return events.stream()
                 .map(event -> {
@@ -114,8 +114,7 @@ public class EventServiceImpl implements EventService {
         }
 
         EventFullDto dto = eventMapper.toEventFullDto(event);
-
-        Map<Long, Long> viewsMap = getViews(Collections.singletonList(eventId));
+        Map<Long, Long> viewsMap = getAllViews(Collections.singletonList(eventId));
         dto.setViews(viewsMap.getOrDefault(eventId, 0L));
 
         return dto;
@@ -166,8 +165,7 @@ public class EventServiceImpl implements EventService {
         log.info("Событие ID: {} обновлено пользователем ID: {}, статус: {}", eventId, userId, updatedEvent.getState());
 
         EventFullDto dto = eventMapper.toEventFullDto(updatedEvent);
-
-        Map<Long, Long> viewsMap = getViews(Collections.singletonList(eventId));
+        Map<Long, Long> viewsMap = getAllViews(Collections.singletonList(eventId));
         dto.setViews(viewsMap.getOrDefault(eventId, 0L));
 
         return dto;
@@ -180,16 +178,14 @@ public class EventServiceImpl implements EventService {
         log.info("Поиск событий админом: users={}, states={}, categories={}", users, states, categories);
 
         Pageable pageable = createPageable(from, size);
-
         Specification<Event> spec = buildAdminSpecification(users, states, categories, rangeStart, rangeEnd);
-
         List<Event> events = eventRepository.findAll(spec, pageable).getContent();
 
         List<Long> eventIds = events.stream()
                 .map(Event::getId)
                 .collect(Collectors.toList());
 
-        Map<Long, Long> viewsMap = getViews(eventIds);
+        Map<Long, Long> viewsMap = getAllViews(eventIds);
 
         return events.stream()
                 .map(event -> {
@@ -228,8 +224,7 @@ public class EventServiceImpl implements EventService {
         log.info("Событие ID: {} обновлено администратором, статус: {}", eventId, updatedEvent.getState());
 
         EventFullDto dto = eventMapper.toEventFullDto(updatedEvent);
-
-        Map<Long, Long> viewsMap = getViews(Collections.singletonList(eventId));
+        Map<Long, Long> viewsMap = getAllViews(Collections.singletonList(eventId));
         dto.setViews(viewsMap.getOrDefault(eventId, 0L));
 
         return dto;
@@ -255,7 +250,6 @@ public class EventServiceImpl implements EventService {
         LocalDateTime end = rangeEnd;
 
         Specification<Event> spec = buildPublicSpecification(text, categories, paid, start, end, onlyAvailable);
-
         Pageable pageable = createPageable(from, size);
         List<Event> events = eventRepository.findAll(spec, pageable).getContent();
 
@@ -263,7 +257,7 @@ public class EventServiceImpl implements EventService {
                 .map(Event::getId)
                 .collect(Collectors.toList());
 
-        Map<Long, Long> viewsMap = getViews(eventIds);
+        Map<Long, Long> viewsMap = getUniqueViews(eventIds);
 
         List<EventShortDto> dtos = events.stream()
                 .map(event -> {
@@ -307,8 +301,7 @@ public class EventServiceImpl implements EventService {
         }
 
         EventFullDto dto = eventMapper.toEventFullDto(event);
-
-        Map<Long, Long> viewsMap = getViews(Collections.singletonList(eventId));
+        Map<Long, Long> viewsMap = getUniqueViews(Collections.singletonList(eventId));
         dto.setViews(viewsMap.getOrDefault(eventId, 0L));
 
         return dto;
@@ -463,8 +456,15 @@ public class EventServiceImpl implements EventService {
         }
     }
 
+    private Map<Long, Long> getUniqueViews(List<Long> eventIds) {
+        return getViews(eventIds, true);
+    }
 
-    private Map<Long, Long> getViews(List<Long> eventIds) {
+    private Map<Long, Long> getAllViews(List<Long> eventIds) {
+        return getViews(eventIds, false);
+    }
+
+    private Map<Long, Long> getViews(List<Long> eventIds, boolean unique) {
         Map<Long, Long> viewsMap = new HashMap<>();
 
         if (eventIds.isEmpty()) {
@@ -476,13 +476,13 @@ public class EventServiceImpl implements EventService {
                     .map(id -> "/events/" + id)
                     .collect(Collectors.toList());
 
-            log.info("Получение статистики для URI: {}", uris);
+            log.info("Получение статистики для URI: {}, unique={}", uris, unique);
 
             List<ViewStatsDto> stats = statsClient.getStats(
-                    LocalDateTime.of(2020, 1, 1, 0, 0),
-                    LocalDateTime.of(2035, 1, 1, 0, 0),
+                    STATS_START,
+                    STATS_END,
                     uris,
-                    false
+                    unique
             );
 
             log.info("Получено записей статистики: {}", stats.size());
@@ -493,7 +493,7 @@ public class EventServiceImpl implements EventService {
                     try {
                         Long eventId = Long.parseLong(uri.substring("/events/".length()));
                         viewsMap.put(eventId, stat.getHits());
-                        log.info("Событие {} имеет {} просмотров", eventId, stat.getHits());
+                        log.info("Событие {} имеет {} просмотров (unique={})", eventId, stat.getHits(), unique);
                     } catch (NumberFormatException e) {
                         log.warn("Некорректный URI в статистике: {}", uri);
                     }

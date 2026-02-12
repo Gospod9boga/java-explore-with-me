@@ -36,15 +36,20 @@ public class EventMapper {
         dto.setDescription(event.getDescription());
         dto.setEventDate(event.getEventDate());
         dto.setInitiator(userMapper.toUserShortDto(event.getInitiator()));
-        dto.setLocation(toLocationDto(event.getLocation()));
+
+        if (event.getLocation() != null) {
+            EventFullDto.Location locationDto = new EventFullDto.Location();
+            locationDto.setLat(event.getLocation().getLat());
+            locationDto.setLon(event.getLocation().getLon());
+            dto.setLocation(locationDto);
+        }
+
         dto.setPaid(event.getPaid());
         dto.setParticipantLimit(event.getParticipantLimit());
         dto.setPublishedOn(event.getPublishedOn());
         dto.setRequestModeration(event.getRequestModeration());
         dto.setState(event.getState());
         dto.setTitle(event.getTitle());
-        dto.setViews(event.getViews());
-
         return dto;
     }
 
@@ -62,8 +67,6 @@ public class EventMapper {
         dto.setInitiator(userMapper.toUserShortDto(event.getInitiator()));
         dto.setPaid(event.getPaid());
         dto.setTitle(event.getTitle());
-        dto.setViews(event.getViews());
-
         return dto;
     }
 
@@ -86,7 +89,6 @@ public class EventMapper {
                 .requestModeration(newEventDto.getRequestModeration() != null ? newEventDto.getRequestModeration() : true)
                 .state(EventState.PENDING)
                 .title(newEventDto.getTitle())
-                .views(0L)
                 .build();
     }
 
@@ -107,10 +109,6 @@ public class EventMapper {
             event.setEventDate(request.getEventDate());
         }
 
-        // Игнорируем location - тесты отправляют его в кривом формате
-        // if (request.getLocation() != null) {
-        //     event.setLocation(toEventLocation((LocationDto) request.getLocation()));
-        // }
 
         if (request.getPaid() != null) {
             event.setPaid(Boolean.parseBoolean(request.getPaid()));
@@ -154,10 +152,6 @@ public class EventMapper {
             event.setEventDate(request.getEventDate());
         }
 
-        // Игнорируем location - тесты отправляют его в кривом формате
-        // if (request.getLocation() != null) {
-        //     event.setLocation(toEventLocation((LocationDto) request.getLocation()));
-        // }
 
         if (request.getPaid() != null) {
             event.setPaid(Boolean.parseBoolean(request.getPaid()));
@@ -182,17 +176,6 @@ public class EventMapper {
         if (request.getTitle() != null) {
             event.setTitle(request.getTitle());
         }
-    }
-
-    private EventFullDto.Location toLocationDto(Event.Location location) {
-        if (location == null) {
-            return null;
-        }
-
-        EventFullDto.Location dto = new EventFullDto.Location();
-        dto.setLat(location.getLat());
-        dto.setLon(location.getLon());
-        return dto;
     }
 
     private Event.Location toEventLocation(LocationDto locationDto) {
