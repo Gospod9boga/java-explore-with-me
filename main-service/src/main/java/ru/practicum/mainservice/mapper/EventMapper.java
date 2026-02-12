@@ -141,7 +141,6 @@ public class EventMapper {
         if (request.getEventDate() != null) {
             event.setEventDate(request.getEventDate());
         }
-        
 
         if (request.getPaid() != null) {
             event.setPaid(request.getPaid());
