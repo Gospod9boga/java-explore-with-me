@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
-public class ErrorHandler {
+public class StatsClientErrorHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
