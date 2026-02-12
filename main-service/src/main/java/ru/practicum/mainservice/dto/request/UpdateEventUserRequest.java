@@ -1,10 +1,7 @@
 package ru.practicum.mainservice.dto.request;
 
-import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-
-
 import java.time.LocalDateTime;
 
 @Data
@@ -20,12 +17,11 @@ public class UpdateEventUserRequest {
 
     private LocalDateTime eventDate;
 
-    private Boolean paid;
+    private String paid;
 
-    @PositiveOrZero(message = "Participant limit must be positive or zero")
-    private Integer participantLimit;
+    private String participantLimit;
 
-    private Boolean requestModeration;
+    private String requestModeration;
 
     @Size(min = 3, max = 120, message = "Title must be between 3 and 120 characters")
     private String title;

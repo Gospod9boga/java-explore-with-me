@@ -107,17 +107,16 @@ public class EventMapper {
             event.setEventDate(request.getEventDate());
         }
 
-
         if (request.getPaid() != null) {
-            event.setPaid(request.getPaid());
+            event.setPaid(Boolean.parseBoolean(request.getPaid()));
         }
 
         if (request.getParticipantLimit() != null) {
-            event.setParticipantLimit(request.getParticipantLimit());
+            event.setParticipantLimit(Integer.parseInt(request.getParticipantLimit()));
         }
 
         if (request.getRequestModeration() != null) {
-            event.setRequestModeration(request.getRequestModeration());
+            event.setRequestModeration(Boolean.parseBoolean(request.getRequestModeration()));
         }
 
         if (request.getTitle() != null) {
@@ -143,15 +142,15 @@ public class EventMapper {
         }
 
         if (request.getPaid() != null) {
-            event.setPaid(request.getPaid());
+            event.setPaid(Boolean.parseBoolean(request.getPaid()));
         }
 
         if (request.getParticipantLimit() != null) {
-            event.setParticipantLimit(request.getParticipantLimit());
+            event.setParticipantLimit(Integer.parseInt(request.getParticipantLimit()));
         }
 
         if (request.getRequestModeration() != null) {
-            event.setRequestModeration(request.getRequestModeration());
+            event.setRequestModeration(Boolean.parseBoolean(request.getRequestModeration()));
         }
 
         if (request.getTitle() != null) {
