@@ -16,14 +16,20 @@
               "});",
               "",
               "var jsonData = pm.response.json();",
-              "pm.collectionVariables.set('userId', jsonData.id);"
+              "pm.collectionVariables.set('userId', jsonData.id);",
+              "console.log('User created with ID:', jsonData.id);"
             ]
           }
         }
       ],
       "request": {
         "method": "POST",
-        "header": [],
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
         "url": "{{baseUrl}}/admin/users",
         "body": {
           "mode": "raw",
@@ -40,14 +46,23 @@
             "exec": [
               "pm.test(\"Status code is 201\", function () {",
               "    pm.response.to.have.status(201);",
-              "});"
+              "});",
+              "",
+              "var jsonData = pm.response.json();",
+              "pm.collectionVariables.set('categoryId', jsonData.id);",
+              "console.log('Category created with ID:', jsonData.id);"
             ]
           }
         }
       ],
       "request": {
         "method": "POST",
-        "header": [],
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
         "url": "{{baseUrl}}/admin/categories",
         "body": {
           "mode": "raw",
@@ -67,18 +82,24 @@
               "});",
               "",
               "var jsonData = pm.response.json();",
-              "pm.collectionVariables.set('eventId', jsonData.id);"
+              "pm.collectionVariables.set('eventId', jsonData.id);",
+              "console.log('Event created with ID:', jsonData.id);"
             ]
           }
         }
       ],
       "request": {
         "method": "POST",
-        "header": [],
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
         "url": "{{baseUrl}}/users/{{userId}}/events",
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"annotation\": \"Тестовое событие для рейтинга\",\n    \"category\": 1,\n    \"description\": \"Описание тестового события\",\n    \"eventDate\": \"2025-12-31 15:00:00\",\n    \"location\": {\"lat\": 55.7558, \"lon\": 37.6176},\n    \"paid\": false,\n    \"participantLimit\": 0,\n    \"requestModeration\": false,\n    \"title\": \"Тестовое событие\"\n}"
+          "raw": "{\n    \"annotation\": \"Тестовое событие для рейтинга\",\n    \"category\": {{categoryId}},\n    \"description\": \"Описание тестового события\",\n    \"eventDate\": \"2025-12-31 15:00:00\",\n    \"location\": {\"lat\": 55.7558, \"lon\": 37.6176},\n    \"paid\": false,\n    \"participantLimit\": 0,\n    \"requestModeration\": false,\n    \"title\": \"Тестовое событие\"\n}"
         }
       }
     },
@@ -98,7 +119,12 @@
       ],
       "request": {
         "method": "PATCH",
-        "header": [],
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
         "url": "{{baseUrl}}/admin/events/{{eventId}}",
         "body": {
           "mode": "raw",
@@ -118,18 +144,25 @@
               "});",
               "",
               "var jsonData = pm.response.json();",
-              "pm.test(\"Response has likes field\", function () {",
+              "pm.test(\"Response has rating fields\", function () {",
               "    pm.expect(jsonData).to.have.property('likes');",
               "    pm.expect(jsonData).to.have.property('dislikes');",
               "    pm.expect(jsonData).to.have.property('rating');",
-              "});"
+              "});",
+              "",
+              "pm.collectionVariables.set('likesCount', jsonData.likes);"
             ]
           }
         }
       ],
       "request": {
         "method": "POST",
-        "header": [],
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
         "url": "{{baseUrl}}/users/{{userId}}/events/{{eventId}}/ratings",
         "body": {
           "mode": "raw",
@@ -151,6 +184,11 @@
               "var jsonData = pm.response.json();",
               "pm.test(\"Rating is correct\", function () {",
               "    pm.expect(jsonData.likes).to.be.at.least(1);",
+              "});",
+              "",
+              "pm.test(\"Likes increased\", function () {",
+              "    var previousLikes = pm.collectionVariables.get('likesCount');",
+              "    pm.expect(jsonData.likes).to.be.at.least(previousLikes);",
               "});"
             ]
           }
@@ -158,7 +196,12 @@
       ],
       "request": {
         "method": "GET",
-        "header": [],
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
         "url": "{{baseUrl}}/events/{{eventId}}/rating"
       }
     },
@@ -176,6 +219,14 @@
               "var jsonData = pm.response.json();",
               "pm.test(\"Response is array\", function () {",
               "    pm.expect(jsonData).to.be.an('array');",
+              "});",
+              "",
+              "pm.test(\"Event in top list\", function () {",
+              "    var eventId = pm.collectionVariables.get('eventId');",
+              "    var found = jsonData.some(function(item) {",
+              "        return item.eventId == eventId;",
+              "    });",
+              "    pm.expect(found).to.be.true;",
               "});"
             ]
           }
@@ -183,8 +234,13 @@
       ],
       "request": {
         "method": "GET",
-        "header": [],
-        "url": "{{baseUrl}}/events/top?size=5"
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/events/top?size=10"
       }
     }
   ],
@@ -192,6 +248,22 @@
     {
       "key": "baseUrl",
       "value": "http://localhost:8080"
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "categoryId",
+      "value": ""
+    },
+    {
+      "key": "eventId",
+      "value": ""
+    },
+    {
+      "key": "likesCount",
+      "value": "0"
     }
   ]
 }
