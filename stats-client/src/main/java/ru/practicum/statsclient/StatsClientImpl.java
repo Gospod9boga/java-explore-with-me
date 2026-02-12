@@ -1,6 +1,7 @@
 package ru.practicum.statsclient;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -10,11 +11,9 @@ import ru.practicum.statsdto.ViewStatsDto;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StatsClientImpl implements StatsClient {
@@ -48,12 +47,17 @@ public class StatsClientImpl implements StatsClient {
             params.put("uris", String.join(",", uris));
         }
 
-        ResponseEntity<ViewStatsDto[]> response = restTemplate.getForEntity(
-                baseUrl,
-                ViewStatsDto[].class,
-                params
-        );
-
-        return Arrays.asList(response.getBody());
+        try {
+            ResponseEntity<ViewStatsDto[]> response = restTemplate.getForEntity(
+                    baseUrl,
+                    ViewStatsDto[].class,
+                    params
+            );
+            ViewStatsDto[] body = response.getBody();
+            return body != null ? Arrays.asList(body) : Collections.emptyList();
+        } catch (Exception e) {
+            log.error("Ошибка получения статистики: {}", e.getMessage());
+            return Collections.emptyList();
+        }
     }
 }
