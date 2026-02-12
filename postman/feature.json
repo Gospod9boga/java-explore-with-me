@@ -1,0 +1,317 @@
+{
+  "info": {
+    "name": "Rating Events Feature",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Создание пользователя",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "var jsonData = pm.response.json();",
+              "pm.collectionVariables.set('userId', jsonData.id);",
+              "console.log('User created with ID:', jsonData.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/admin/users",
+          "host": ["{{baseUrl}}"],
+          "path": ["admin", "users"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Test User\", \"email\": \"test@example.com\"}"
+        }
+      }
+    },
+    {
+      "name": "2. Создание категории",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "var jsonData = pm.response.json();",
+              "pm.collectionVariables.set('categoryId', jsonData.id);",
+              "console.log('Category created with ID:', jsonData.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/admin/categories",
+          "host": ["{{baseUrl}}"],
+          "path": ["admin", "categories"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Test Category\"}"
+        }
+      }
+    },
+    {
+      "name": "3. Создание события",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "var jsonData = pm.response.json();",
+              "pm.test(\"Event has id\", function () {",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData.id).to.not.be.undefined;",
+              "});",
+              "",
+              "pm.collectionVariables.set('eventId', jsonData.id);",
+              "console.log('Event created with ID:', jsonData.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users/{{userId}}/events",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "{{userId}}", "events"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"annotation\": \"Тестовое событие для рейтинга\",\n    \"category\": {{categoryId}},\n    \"description\": \"Описание тестового события\",\n    \"eventDate\": \"2030-12-31 15:00:00\",\n    \"location\": {\"lat\": 55.7558, \"lon\": 37.6176},\n    \"paid\": false,\n    \"participantLimit\": 0,\n    \"requestModeration\": false,\n    \"title\": \"Тестовое событие\"\n}"
+        }
+      }
+    },
+    {
+      "name": "4. Публикация события",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var jsonData = pm.response.json();",
+              "pm.test(\"Event is published\", function () {",
+              "    pm.expect(jsonData.state).to.equal('PUBLISHED');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/admin/events/{{eventId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["admin", "events", "{{eventId}}"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"stateAction\": \"PUBLISH_EVENT\"}"
+        }
+      }
+    },
+    {
+      "name": "5. Добавление лайка",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "var jsonData = pm.response.json();",
+              "pm.test(\"Response has rating fields\", function () {",
+              "    pm.expect(jsonData).to.have.property('likes');",
+              "    pm.expect(jsonData).to.have.property('dislikes');",
+              "    pm.expect(jsonData).to.have.property('rating');",
+              "});",
+              "",
+              "pm.collectionVariables.set('likesCount', jsonData.likes);",
+              "console.log('Likes after rating:', jsonData.likes);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users/{{userId}}/events/{{eventId}}/ratings",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "{{userId}}", "events", "{{eventId}}", "ratings"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"isPositive\": true}"
+        }
+      }
+    },
+    {
+      "name": "6. Получение рейтинга события",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var jsonData = pm.response.json();",
+              "pm.test(\"Rating is correct\", function () {",
+              "    pm.expect(jsonData).to.have.property('likes');",
+              "    pm.expect(jsonData).to.have.property('dislikes');",
+              "    pm.expect(jsonData).to.have.property('rating');",
+              "    pm.expect(jsonData.likes).to.be.at.least(1);",
+              "});",
+              "",
+              "pm.test(\"Likes increased\", function () {",
+              "    var previousLikes = pm.collectionVariables.get('likesCount');",
+              "    pm.expect(jsonData.likes).to.be.at.least(previousLikes);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/events/{{eventId}}/rating",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "{{eventId}}", "rating"]
+        }
+      }
+    },
+    {
+      "name": "7. Топ событий",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var jsonData = pm.response.json();",
+              "pm.test(\"Response is array\", function () {",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "});",
+              "",
+              "pm.test(\"Event in top list\", function () {",
+              "    var eventId = pm.collectionVariables.get('eventId');",
+              "    var found = jsonData.some(function(item) {",
+              "        return item.eventId == eventId;",
+              "    });",
+              "    pm.expect(found).to.be.true;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/events/top?size=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "top"],
+          "query": [
+            {
+              "key": "size",
+              "value": "10"
+            }
+          ]
+        }
+      }
+    }
+  ],
+    "variable": [
+      {
+        "key": "baseUrl",
+        "value": "http://localhost:8080"
+      },
+      {
+        "key": "userId",
+        "value": ""
+      },
+      {
+        "key": "categoryId",
+        "value": ""
+      },
+      {
+        "key": "eventId",
+        "value": ""
+      },
+      {
+        "key": "likesCount",
+        "value": "0"
+      }
+  ]
+}
