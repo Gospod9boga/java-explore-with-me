@@ -296,7 +296,6 @@ public class EventServiceImpl implements EventService {
         if (event.getState() != EventState.PUBLISHED) {
             throw new EventNotFoundException("Событие с ID " + eventId + " не найдено или не опубликовано");
         }
-        
         if (request != null) {
             saveHit(request);
         } else {
