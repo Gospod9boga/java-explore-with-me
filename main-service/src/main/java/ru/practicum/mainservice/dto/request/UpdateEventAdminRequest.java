@@ -20,8 +20,6 @@ public class UpdateEventAdminRequest {
 
     private LocalDateTime eventDate;
 
-    private Object location;
-
     private Boolean paid;
 
     @PositiveOrZero(message = "Participant limit must be positive or zero")
