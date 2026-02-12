@@ -292,26 +292,26 @@
       }
     }
   ],
-  "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://ewm-service:8080"
-    },
-    {
-      "key": "userId",
-      "value": ""
-    },
-    {
-      "key": "categoryId",
-      "value": ""
-    },
-    {
-      "key": "eventId",
-      "value": ""
-    },
-    {
-      "key": "likesCount",
-      "value": "0"
-    }
+    "variable": [
+      {
+        "key": "baseUrl",
+        "value": "http://localhost:8080"
+      },
+      {
+        "key": "userId",
+        "value": ""
+      },
+      {
+        "key": "categoryId",
+        "value": ""
+      },
+      {
+        "key": "eventId",
+        "value": ""
+      },
+      {
+        "key": "likesCount",
+        "value": "0"
+      }
   ]
 }
