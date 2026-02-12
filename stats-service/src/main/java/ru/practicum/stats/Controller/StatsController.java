@@ -41,7 +41,6 @@ public class StatsController {
             @RequestParam(defaultValue = "false") boolean unique) {
 
         log.info("Запрос статистики: start={}, end={}, uris={}, unique={}", start, end, uris, unique);
-        
         String cleanStart = start.replace("%20", " ").replace("+", " ");
         String cleanEnd = end.replace("%20", " ").replace("+", " ");
 
