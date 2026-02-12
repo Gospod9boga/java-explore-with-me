@@ -1,6 +1,7 @@
 package ru.practicum.mainservice.service.impl;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.mainservice.dto.request.NewUserRequest;
 import ru.practicum.mainservice.dto.response.UserDto;
 import ru.practicum.mainservice.exception.EmailAlreadyExistsException;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -25,6 +26,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto createUser(NewUserRequest userRequest) {
 
         if (userRepository.existsByEmail(userRequest.getEmail())) {
@@ -63,6 +65,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException("User with id " + userId + " not found");

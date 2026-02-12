@@ -3,6 +3,7 @@ package ru.practicum.mainservice.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.mainservice.dto.request.NewCategoryDto;
 import ru.practicum.mainservice.dto.response.CategoryDto;
 import ru.practicum.mainservice.exception.CategoryNameAlreadyExistsException;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
@@ -27,6 +29,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final EventRepository eventRepository;
 
     @Override
+    @Transactional
     public CategoryDto createCategory(NewCategoryDto newCategoryDto) {
         log.info("Создание категории: {}", newCategoryDto.getName());
 
@@ -46,6 +49,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public CategoryDto updateCategory(Long catId, NewCategoryDto newCategoryDto) {
         log.info("Обновление категории ID: {}", catId);
 
@@ -72,6 +76,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public void deleteCategory(Long catId) {
         log.info("Удаление категории ID: {}", catId);
 

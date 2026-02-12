@@ -452,9 +452,6 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    /**
-     * Сохраняет хит для конкретного события (эндпоинт /events/{id})
-     */
     private void saveEventHit(HttpServletRequest request) {
         try {
             EndpointHitDto hitDto = EndpointHitDto.builder()
