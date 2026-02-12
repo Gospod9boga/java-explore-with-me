@@ -26,7 +26,6 @@ public class NewEventDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
 
-    @NotNull(message = "Location cannot be null")
     private LocationDto location;
 
     private Boolean paid = false;
