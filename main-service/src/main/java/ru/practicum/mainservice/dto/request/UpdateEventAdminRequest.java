@@ -20,8 +20,6 @@ public class UpdateEventAdminRequest {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
 
-    private Object location;
-
     private String paid;
 
     @PositiveOrZero(message = "Participant limit must be positive or zero")
