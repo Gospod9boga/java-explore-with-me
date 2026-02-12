@@ -109,6 +109,8 @@ public class EventMapper {
 
         if (request.getLocation() != null) {
             event.setLocation(toEventLocation(request.getLocation()));
+        } else if (request.getOldLocation() != null) {
+            event.setLocation(request.getOldLocation());
         }
 
         if (request.getPaid() != null) {
@@ -147,6 +149,8 @@ public class EventMapper {
 
         if (request.getLocation() != null) {
             event.setLocation(toEventLocation(request.getLocation()));
+        } else if (request.getOldLocation() != null) {
+            event.setLocation(request.getOldLocation());
         }
 
         if (request.getPaid() != null) {
@@ -165,6 +169,7 @@ public class EventMapper {
             event.setTitle(request.getTitle());
         }
     }
+
 
     private EventFullDto.Location toLocationDto(Event.Location location) {
         if (location == null) {
