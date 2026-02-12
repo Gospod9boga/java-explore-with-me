@@ -1,8 +1,10 @@
 package ru.practicum.stats.Service;
 
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.stats.Repo.HitRepository;
 import ru.practicum.statsdto.ViewStatsDto;
 
@@ -13,6 +15,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class StatsService {
 
     private final HitRepository hitRepository;
