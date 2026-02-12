@@ -3,8 +3,7 @@ package ru.practicum.mainservice.dto.request;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import ru.practicum.mainservice.dto.LocationDto;
-import ru.practicum.mainservice.model.entity.Event;
+
 
 import java.time.LocalDateTime;
 
@@ -21,8 +20,7 @@ public class UpdateEventAdminRequest {
 
     private LocalDateTime eventDate;
 
-    private LocationDto location;
-    private Event.Location oldLocation;
+    private Object location;
 
     private Boolean paid;
 

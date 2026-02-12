@@ -108,9 +108,11 @@ public class EventMapper {
         }
 
         if (request.getLocation() != null) {
-            event.setLocation(toEventLocation(request.getLocation()));
-        } else if (request.getOldLocation() != null) {
-            event.setLocation(request.getOldLocation());
+            if (request.getLocation() instanceof LocationDto) {
+                event.setLocation(toEventLocation((LocationDto) request.getLocation()));
+            } else if (request.getLocation() instanceof Event.Location) {
+                event.setLocation((Event.Location) request.getLocation());
+            }
         }
 
         if (request.getPaid() != null) {
@@ -148,9 +150,11 @@ public class EventMapper {
         }
 
         if (request.getLocation() != null) {
-            event.setLocation(toEventLocation(request.getLocation()));
-        } else if (request.getOldLocation() != null) {
-            event.setLocation(request.getOldLocation());
+            if (request.getLocation() instanceof LocationDto) {
+                event.setLocation(toEventLocation((LocationDto) request.getLocation()));
+            } else if (request.getLocation() instanceof Event.Location) {
+                event.setLocation((Event.Location) request.getLocation());
+            }
         }
 
         if (request.getPaid() != null) {
