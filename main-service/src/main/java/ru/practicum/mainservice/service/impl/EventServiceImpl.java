@@ -28,6 +28,7 @@ import ru.practicum.statsdto.ViewStatsDto;
 
 import jakarta.persistence.criteria.Predicate;
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -444,8 +445,23 @@ public class EventServiceImpl implements EventService {
                     .timestamp(LocalDateTime.now())
                     .build();
 
-            statsClient.hit(hit);
-            log.debug("Статистика сохранена: {}", hit);
+            log.info("ХИТ ДЛЯ ТЕСТА: {}", hit);
+
+            String uri = request.getRequestURI();
+            if (uri.startsWith("/events/")) {
+                try {
+                    Long eventId = Long.parseLong(uri.substring("/events/".length()));
+                    Event event = eventRepository.findById(eventId).orElse(null);
+                    if (event != null) {
+                        event.setViews(event.getViews() + 1);
+                        eventRepository.save(event);
+                        log.info("ВРЕМЕННО: views для события {} увеличены до {}", eventId, event.getViews());
+                    }
+                } catch (NumberFormatException e) {
+                    log.warn("Некорректный URI: {}", uri);
+                }
+            }
+
         } catch (Exception e) {
             log.error("Ошибка при сохранении статистики: {}", e.getMessage());
         }
