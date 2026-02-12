@@ -23,10 +23,12 @@ import ru.practicum.mainservice.repository.EventRepository;
 import ru.practicum.mainservice.repository.UserRepository;
 import ru.practicum.mainservice.service.EventService;
 import ru.practicum.statsclient.StatsClient;
+import ru.practicum.statsdto.EndpointHitDto;
 import ru.practicum.statsdto.ViewStatsDto;
 
 import jakarta.persistence.criteria.Predicate;
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,6 +45,8 @@ public class EventServiceImpl implements EventService {
     private final EventMapper eventMapper;
     private final StatsClient statsClient;
 
+    private static final String APP_NAME = "ewm-main-service";
+
     @Override
     @Transactional
     public EventFullDto createEvent(Long userId, NewEventDto newEventDto) {
@@ -57,11 +61,15 @@ public class EventServiceImpl implements EventService {
         validateEventDate(newEventDto.getEventDate(), 2, "Дата события должна быть не ранее чем через 2 часа от текущего момента");
 
         Event event = eventMapper.toEvent(newEventDto, initiator, category);
+        event.setViews(0L);
 
         Event savedEvent = eventRepository.save(event);
         log.info("Событие создано с ID: {}", savedEvent.getId());
 
-        return eventMapper.toEventFullDto(savedEvent);
+        EventFullDto dto = eventMapper.toEventFullDto(savedEvent);
+        dto.setViews(0L);
+
+        return dto;
     }
 
     @Override
@@ -105,11 +113,10 @@ public class EventServiceImpl implements EventService {
             throw new EventAccessDeniedException("Событие не принадлежит пользователю");
         }
 
-        event.setViews(event.getViews() + 1);
-        eventRepository.save(event);
-
         EventFullDto dto = eventMapper.toEventFullDto(event);
-        dto.setViews(event.getViews());
+
+        Map<Long, Long> viewsMap = getViews(Collections.singletonList(eventId));
+        dto.setViews(viewsMap.getOrDefault(eventId, 0L));
 
         return dto;
     }
@@ -158,7 +165,12 @@ public class EventServiceImpl implements EventService {
         Event updatedEvent = eventRepository.save(event);
         log.info("Событие ID: {} обновлено пользователем ID: {}, статус: {}", eventId, userId, updatedEvent.getState());
 
-        return eventMapper.toEventFullDto(updatedEvent);
+        EventFullDto dto = eventMapper.toEventFullDto(updatedEvent);
+
+        Map<Long, Long> viewsMap = getViews(Collections.singletonList(eventId));
+        dto.setViews(viewsMap.getOrDefault(eventId, 0L));
+
+        return dto;
     }
 
     @Override
@@ -290,12 +302,14 @@ public class EventServiceImpl implements EventService {
             throw new EventNotFoundException("Событие с ID " + eventId + " не найдено или не опубликовано");
         }
 
-        event.setViews(event.getViews() + 1);
-        eventRepository.save(event);
-        log.info("Views для события {} увеличены до {}", eventId, event.getViews());
+        if (request != null) {
+            saveHit(request);
+        }
 
         EventFullDto dto = eventMapper.toEventFullDto(event);
-        dto.setViews(event.getViews());
+
+        Map<Long, Long> viewsMap = getViews(Collections.singletonList(eventId));
+        dto.setViews(viewsMap.getOrDefault(eventId, 0L));
 
         return dto;
     }
@@ -431,8 +445,24 @@ public class EventServiceImpl implements EventService {
     }
 
     private void saveHit(HttpServletRequest request) {
-        log.info("Метод saveHit временно отключен для прохождения тестов");
+        try {
+            EndpointHitDto hitDto = EndpointHitDto.builder()
+                    .app(APP_NAME)
+                    .uri(request.getRequestURI())
+                    .ip(request.getRemoteAddr())
+                    .timestamp(LocalDateTime.now())
+                    .build();
+
+            log.info("Отправка хита в статистику: app={}, uri={}, ip={}, timestamp={}",
+                    hitDto.getApp(), hitDto.getUri(), hitDto.getIp(), hitDto.getTimestamp());
+
+            statsClient.hit(hitDto);
+            log.info("Хит успешно отправлен");
+        } catch (Exception e) {
+            log.error("Ошибка при отправке хита в статистику: {}", e.getMessage(), e);
+        }
     }
+
 
     private Map<Long, Long> getViews(List<Long> eventIds) {
         Map<Long, Long> viewsMap = new HashMap<>();
@@ -446,12 +476,16 @@ public class EventServiceImpl implements EventService {
                     .map(id -> "/events/" + id)
                     .collect(Collectors.toList());
 
+            log.info("Получение статистики для URI: {}", uris);
+
             List<ViewStatsDto> stats = statsClient.getStats(
-                    LocalDateTime.now().minusYears(2),
-                    LocalDateTime.now().plusHours(1),
+                    LocalDateTime.of(2020, 1, 1, 0, 0),
+                    LocalDateTime.of(2035, 1, 1, 0, 0),
                     uris,
-                    true
+                    false
             );
+
+            log.info("Получено записей статистики: {}", stats.size());
 
             for (ViewStatsDto stat : stats) {
                 String uri = stat.getUri();
@@ -459,6 +493,7 @@ public class EventServiceImpl implements EventService {
                     try {
                         Long eventId = Long.parseLong(uri.substring("/events/".length()));
                         viewsMap.put(eventId, stat.getHits());
+                        log.info("Событие {} имеет {} просмотров", eventId, stat.getHits());
                     } catch (NumberFormatException e) {
                         log.warn("Некорректный URI в статистике: {}", uri);
                     }
@@ -466,7 +501,7 @@ public class EventServiceImpl implements EventService {
             }
 
         } catch (Exception e) {
-            log.error("Ошибка при получении статистики: {}", e.getMessage());
+            log.error("Ошибка при получении статистики: {}", e.getMessage(), e);
         }
 
         return viewsMap;
