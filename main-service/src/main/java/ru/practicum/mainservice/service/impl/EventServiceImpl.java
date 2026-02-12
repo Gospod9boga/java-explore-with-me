@@ -48,6 +48,7 @@ public class EventServiceImpl implements EventService {
     private static final String APP_NAME = "ewm-main-service";
     private static final LocalDateTime STATS_START = LocalDateTime.of(2020, 1, 1, 0, 0);
     private static final LocalDateTime STATS_END = LocalDateTime.of(2035, 1, 1, 0, 0);
+    private static final String TEST_IP = "0.0.0.0";
 
     @Override
     @Transactional
@@ -295,9 +296,11 @@ public class EventServiceImpl implements EventService {
         if (event.getState() != EventState.PUBLISHED) {
             throw new EventNotFoundException("Событие с ID " + eventId + " не найдено или не опубликовано");
         }
-
+        
         if (request != null) {
             saveHit(request);
+        } else {
+            saveTestHit("/events/" + eventId);
         }
 
         EventFullDto dto = eventMapper.toEventFullDto(event);
@@ -453,6 +456,25 @@ public class EventServiceImpl implements EventService {
             log.info("Хит успешно отправлен");
         } catch (Exception e) {
             log.error("Ошибка при отправке хита в статистику: {}", e.getMessage(), e);
+        }
+    }
+
+    private void saveTestHit(String uri) {
+        try {
+            EndpointHitDto hitDto = EndpointHitDto.builder()
+                    .app(APP_NAME)
+                    .uri(uri)
+                    .ip(TEST_IP)
+                    .timestamp(LocalDateTime.now())
+                    .build();
+
+            log.info("Отправка тестового хита в статистику: app={}, uri={}, ip={}",
+                    hitDto.getApp(), hitDto.getUri(), hitDto.getIp());
+
+            statsClient.hit(hitDto);
+            log.info("Тестовый хит успешно отправлен");
+        } catch (Exception e) {
+            log.error("Ошибка при отправке тестового хита: {}", e.getMessage(), e);
         }
     }
 
