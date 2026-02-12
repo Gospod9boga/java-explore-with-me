@@ -168,7 +168,22 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Событие с ID " + eventId + " не найдено"));
 
+        if (request.getEventDate() != null && request.getEventDate().isBefore(LocalDateTime.now())) {
+            throw new EventValidationException("Дата события не может быть в прошлом");
+        }
+
+        if (request.getCategory() != null) {
+            Category category = categoryRepository.findById(request.getCategory())
+                    .orElseThrow(() -> new CategoryNotFoundException("Категория с ID " + request.getCategory() + " не найдена"));
+            event.setCategory(category);
+        }
+
         eventMapper.updateEventFromAdminRequest(request, event);
+
+        if (request.getStateAction() != null) {
+            handleAdminStateAction(event, request.getStateAction());
+        }
+
         Event updatedEvent = eventRepository.save(event);
         log.info("Событие ID: {} обновлено администратором", eventId);
 

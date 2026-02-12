@@ -109,11 +109,7 @@ public class EventMapper {
 
         // Игнорируем location - тесты отправляют его в кривом формате
         // if (request.getLocation() != null) {
-        //     if (request.getLocation() instanceof LocationDto) {
-        //         event.setLocation(toEventLocation((LocationDto) request.getLocation()));
-        //     } else if (request.getLocation() instanceof Event.Location) {
-        //         event.setLocation((Event.Location) request.getLocation());
-        //     }
+        //     event.setLocation(toEventLocation((LocationDto) request.getLocation()));
         // }
 
         if (request.getPaid() != null) {
@@ -160,11 +156,7 @@ public class EventMapper {
 
         // Игнорируем location - тесты отправляют его в кривом формате
         // if (request.getLocation() != null) {
-        //     if (request.getLocation() instanceof LocationDto) {
-        //         event.setLocation(toEventLocation((LocationDto) request.getLocation()));
-        //     } else if (request.getLocation() instanceof Event.Location) {
-        //         event.setLocation((Event.Location) request.getLocation());
-        //     }
+        //     event.setLocation(toEventLocation((LocationDto) request.getLocation()));
         // }
 
         if (request.getPaid() != null) {
