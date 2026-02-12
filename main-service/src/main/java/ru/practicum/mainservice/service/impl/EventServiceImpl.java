@@ -126,9 +126,37 @@ public class EventServiceImpl implements EventService {
             throw new EventAccessDeniedException("Событие не принадлежит пользователю");
         }
 
+        if (event.getState() != EventState.PENDING && event.getState() != EventState.CANCELED) {
+            throw new EventAccessDeniedException("Можно редактировать только события в состоянии PENDING или CANCELED");
+        }
+
+        if (request.getEventDate() != null) {
+            validateEventDate(request.getEventDate(), 2, "Дата события должна быть не ранее чем через 2 часа от текущего момента");
+        }
+
+        if (request.getCategory() != null) {
+            Category category = categoryRepository.findById(request.getCategory())
+                    .orElseThrow(() -> new CategoryNotFoundException("Категория с ID " + request.getCategory() + " не найдена"));
+            event.setCategory(category);
+        }
+
         eventMapper.updateEventFromUserRequest(request, event);
+
+        if (request.getStateAction() != null) {
+            switch (request.getStateAction()) {
+                case "SEND_TO_REVIEW":
+                    event.setState(EventState.PENDING);
+                    break;
+                case "CANCEL_REVIEW":
+                    event.setState(EventState.CANCELED);
+                    break;
+                default:
+                    throw new EventValidationException("Некорректное значение stateAction: " + request.getStateAction());
+            }
+        }
+
         Event updatedEvent = eventRepository.save(event);
-        log.info("Событие ID: {} обновлено пользователем ID: {}", eventId, userId);
+        log.info("Событие ID: {} обновлено пользователем ID: {}, статус: {}", eventId, userId, updatedEvent.getState());
 
         return eventMapper.toEventFullDto(updatedEvent);
     }
@@ -185,7 +213,7 @@ public class EventServiceImpl implements EventService {
         }
 
         Event updatedEvent = eventRepository.save(event);
-        log.info("Событие ID: {} обновлено администратором", eventId);
+        log.info("Событие ID: {} обновлено администратором, статус: {}", eventId, updatedEvent.getState());
 
         EventFullDto dto = eventMapper.toEventFullDto(updatedEvent);
 
