@@ -43,7 +43,6 @@ public class RatingServiceImpl implements RatingService {
             throw new IllegalStateException("Нельзя оценивать неопубликованное событие");
         }
         String uri = "/events/" + eventId + "/rating";
-
         EndpointHitDto hitDto = EndpointHitDto.builder()
                 .app(APP_NAME)
                 .uri(uri)
@@ -53,7 +52,6 @@ public class RatingServiceImpl implements RatingService {
         statsClient.hit(hitDto);
         log.info("Оценка отправлена в статистику: userId={}, eventId={}, isPositive={}",
                 userId, eventId, newRatingDto.getIsPositive());
-
         return getEventRating(eventId);
     }
 
@@ -65,7 +63,6 @@ public class RatingServiceImpl implements RatingService {
         if (!eventRepository.existsById(eventId)) {
             throw new NotFoundException("Событие с ID " + eventId + " не найдено");
         }
-
         log.info("Оценка удалена (симулировано): userId={}, eventId={}", userId, eventId);
     }
 
@@ -77,19 +74,16 @@ public class RatingServiceImpl implements RatingService {
                 .orElseThrow(() -> new NotFoundException("Событие с ID " + eventId + " не найдено"));
 
         String uri = "/events/" + eventId + "/rating";
-
         List<ViewStatsDto> stats = statsClient.getStats(
                 STATS_START,
                 STATS_END,
                 Collections.singletonList(uri),
                 true
         );
-
         Long totalRatings = 0L;
         if (!stats.isEmpty()) {
             totalRatings = stats.get(0).getHits();
         }
-
         return EventRatingDto.builder()
                 .eventId(eventId)
                 .eventTitle(event.getTitle())
@@ -106,13 +100,11 @@ public class RatingServiceImpl implements RatingService {
         List<Event> events = eventRepository.findAll().stream()
                 .filter(event -> event.getState() == ru.practicum.mainservice.model.enums.EventState.PUBLISHED)
                 .collect(Collectors.toList());
-
         List<EventRatingDto> ratings = events.stream()
                 .map(event -> getEventRating(event.getId()))
                 .sorted((r1, r2) -> r2.getLikes().compareTo(r1.getLikes()))
                 .limit(size)
                 .collect(Collectors.toList());
-
         return ratings;
     }
 }
