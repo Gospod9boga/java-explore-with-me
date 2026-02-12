@@ -28,7 +28,6 @@ import ru.practicum.statsdto.ViewStatsDto;
 
 import jakarta.persistence.criteria.Predicate;
 import jakarta.servlet.http.HttpServletRequest;
-
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -451,12 +450,11 @@ public class EventServiceImpl implements EventService {
             if (uri.startsWith("/events/")) {
                 try {
                     Long eventId = Long.parseLong(uri.substring("/events/".length()));
-                    Event event = eventRepository.findById(eventId).orElse(null);
-                    if (event != null) {
+                    eventRepository.findById(eventId).ifPresent(event -> {
                         event.setViews(event.getViews() + 1);
                         eventRepository.save(event);
                         log.info("ВРЕМЕННО: views для события {} увеличены до {}", eventId, event.getViews());
-                    }
+                    });
                 } catch (NumberFormatException e) {
                     log.warn("Некорректный URI: {}", uri);
                 }
