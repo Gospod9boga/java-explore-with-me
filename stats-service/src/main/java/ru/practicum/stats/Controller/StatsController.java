@@ -1,6 +1,5 @@
 package ru.practicum.stats.Controller;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -28,7 +27,7 @@ public class StatsController {
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
     public void save(@RequestBody EndpointHitDto endpointHitDto) {
-        log.info("Save :{} ", endpointHitDto);
+        log.info("Получен хит: {}", endpointHitDto);
         hitService.saveHit(endpointHitDto);
     }
 
@@ -39,7 +38,7 @@ public class StatsController {
             @RequestParam(required = false) List<String> uris,
             @RequestParam(defaultValue = "false") boolean unique) {
 
-        log.info("Get stats: start={}, end={}, uris={}, unique={}", start, end, uris, unique);
+        log.info("Запрос статистики: start={}, end={}, uris={}, unique={}", start, end, uris, unique);
 
         if (end.isBefore(start)) {
             throw new IllegalArgumentException("End date must be after start date");
