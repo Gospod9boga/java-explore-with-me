@@ -289,11 +289,10 @@ public class EventServiceImpl implements EventService {
             throw new EventNotFoundException("Событие с ID " + eventId + " не найдено или не опубликовано");
         }
 
-        if (request != null) {
             event.setViews(event.getViews() + 1);
             eventRepository.save(event);
             log.info("Принудительно установлены views = {} для события {}", event.getViews(), eventId);
-        }
+
 
         Map<Long, Long> viewsMap = getViews(Collections.singletonList(eventId));
         Long views = viewsMap.getOrDefault(eventId, 0L);

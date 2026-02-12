@@ -1,6 +1,5 @@
 package ru.practicum.mainservice.dto.request;
 
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -19,7 +18,6 @@ public class UpdateEventUserRequest {
     @Size(min = 20, max = 7000, message = "Description must be between 20 and 7000 characters")
     private String description;
 
-    @Future(message = "Event date must be in the future")
     private LocalDateTime eventDate;
 
     private Object location;
