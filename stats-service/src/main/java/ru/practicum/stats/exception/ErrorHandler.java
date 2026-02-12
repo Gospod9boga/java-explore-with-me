@@ -2,6 +2,7 @@ package ru.practicum.stats.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,6 +18,18 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleIllegalArgumentException(IllegalArgumentException ex) {
         log.error("Bad request: {}", ex.getMessage());
+        return Map.of(
+                "status", "BAD_REQUEST",
+                "reason", "Incorrectly made request.",
+                "message", ex.getMessage(),
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleMissingParams(MissingServletRequestParameterException ex) {
+        log.error("Missing parameter: {}", ex.getMessage());
         return Map.of(
                 "status", "BAD_REQUEST",
                 "reason", "Incorrectly made request.",
