@@ -1,28 +1,49 @@
 package ru.practicum.stats.Service;
 
-
-import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.stats.JPA.Hit;
 import ru.practicum.stats.Repo.HitRepository;
 import ru.practicum.statsdto.EndpointHitDto;
 
+import java.time.LocalDateTime;
+
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class HitService {
     private final HitRepository hitRepository;
 
-    public HitService(HitRepository hitRepository) {
-        this.hitRepository = hitRepository;
-    }
-
     @Transactional
     public void saveHit(EndpointHitDto endpointHitDto) {
-        Hit hit = new Hit();
-        hit.setApp(endpointHitDto.getApp());
-        hit.setUri(endpointHitDto.getUri());
-        hit.setIp(endpointHitDto.getIp());
-        hit.setTimestamp(endpointHitDto.getTimestamp());
+        try {
+            log.info("Сохранение хита: app={}, uri={}, ip={}, timestamp={}",
+                    endpointHitDto.getApp(),
+                    endpointHitDto.getUri(),
+                    endpointHitDto.getIp(),
+                    endpointHitDto.getTimestamp());
 
-        hitRepository.save(hit);
+            Hit hit = new Hit();
+            hit.setApp(endpointHitDto.getApp());
+            hit.setUri(endpointHitDto.getUri());
+            hit.setIp(endpointHitDto.getIp());
+
+            // Защита от null timestamp
+            if (endpointHitDto.getTimestamp() != null) {
+                hit.setTimestamp(endpointHitDto.getTimestamp());
+            } else {
+                hit.setTimestamp(LocalDateTime.now());
+                log.warn("Timestamp был null, установлено текущее время");
+            }
+
+            Hit savedHit = hitRepository.save(hit);
+            log.info("Хит сохранен с ID: {}", savedHit.getId());
+
+        } catch (Exception e) {
+            log.error("Ошибка при сохранении хита: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 }

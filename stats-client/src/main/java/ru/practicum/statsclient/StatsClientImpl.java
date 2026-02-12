@@ -1,33 +1,45 @@
 package ru.practicum.statsclient;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.practicum.statsclient.config.StatsClientConfig;
 import ru.practicum.statsdto.EndpointHitDto;
 import ru.practicum.statsdto.ViewStatsDto;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-@Component
+@Slf4j
+@Service
 @RequiredArgsConstructor
 public class StatsClientImpl implements StatsClient {
-    private final RestTemplate restTemplate = new RestTemplate();
+
+    private final RestTemplate restTemplate;
     private final StatsClientConfig config;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
     public void hit(EndpointHitDto endpointHitDto) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<EndpointHitDto> request = new HttpEntity<>(endpointHitDto, headers);
-        String url = config.getUrl() + "/hit";
-        restTemplate.postForEntity(url, request, Void.class);
+            HttpEntity<EndpointHitDto> request = new HttpEntity<>(endpointHitDto, headers);
+            String url = config.getUrl() + "/hit";
+
+            log.info("Отправка POST запроса на URL: {}", url);
+            log.info("Тело запроса: {}", endpointHitDto);
+
+            restTemplate.postForEntity(url, request, Void.class);
+            log.info("Хит успешно отправлен");
+        } catch (Exception e) {
+            log.error("Ошибка при отправке хита: {}", e.getMessage(), e);
+        }
     }
 
     @Override
@@ -35,24 +47,37 @@ public class StatsClientImpl implements StatsClient {
                                        LocalDateTime end,
                                        List<String> uris,
                                        boolean unique) {
-        String baseUrl = config.getUrl() + "/stats?start={start}&end={end}&unique={unique}";
+        try {
+            StringBuilder urlBuilder = new StringBuilder(config.getUrl() + "/stats");
+            urlBuilder.append("?start=").append(start.format(FORMATTER));
+            urlBuilder.append("&end=").append(end.format(FORMATTER));
+            urlBuilder.append("&unique=").append(unique);
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("start", start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        params.put("end", end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        params.put("unique", unique);
+            if (uris != null && !uris.isEmpty()) {
+                for (String uri : uris) {
+                    urlBuilder.append("&uris=").append(uri);
+                }
+            }
 
-        if (uris != null && !uris.isEmpty()) {
-            baseUrl += "&uris={uris}";
-            params.put("uris", String.join(",", uris));
+            String url = urlBuilder.toString();
+            log.info("Запрос статистики: {}", url);
+
+            ResponseEntity<List<ViewStatsDto>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<List<ViewStatsDto>>() {
+                    }
+            );
+
+            List<ViewStatsDto> stats = response.getBody();
+            log.info("Получено записей статистики: {}", stats != null ? stats.size() : 0);
+
+            return stats != null ? stats : Collections.emptyList();
+
+        } catch (Exception e) {
+            log.error("Ошибка при получении статистики: {}", e.getMessage(), e);
+            return Collections.emptyList();
         }
-
-        ResponseEntity<ViewStatsDto[]> response = restTemplate.getForEntity(
-                baseUrl,
-                ViewStatsDto[].class,
-                params
-        );
-
-        return Arrays.asList(response.getBody());
     }
 }
