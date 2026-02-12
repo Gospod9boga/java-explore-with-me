@@ -1,5 +1,4 @@
-package ru.practicum.statsclient;
-
+package ru.practicum.stats.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -12,7 +11,7 @@ import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
-public class StatsClientErrorHandler {
+public class ErrorHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -21,6 +20,18 @@ public class StatsClientErrorHandler {
         return Map.of(
                 "status", "BAD_REQUEST",
                 "reason", "Incorrectly made request.",
+                "message", ex.getMessage(),
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleException(Exception ex) {
+        log.error("Internal error: {}", ex.getMessage(), ex);
+        return Map.of(
+                "status", "INTERNAL_SERVER_ERROR",
+                "reason", "Error occurred",
                 "message", ex.getMessage(),
                 "timestamp", LocalDateTime.now().toString()
         );
