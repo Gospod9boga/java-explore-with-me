@@ -242,9 +242,8 @@ public class EventServiceImpl implements EventService {
         if (rangeStart != null && rangeEnd != null && rangeEnd.isBefore(rangeStart)) {
             throw new EventValidationException("rangeEnd must be after rangeStart");
         }
-
         if (request != null) {
-            saveHit(request);
+            saveEventListHit(request);
         }
 
         LocalDateTime start = rangeStart != null ? rangeStart : LocalDateTime.now();
@@ -297,7 +296,7 @@ public class EventServiceImpl implements EventService {
             throw new EventNotFoundException("Событие с ID " + eventId + " не найдено или не опубликовано");
         }
         if (request != null) {
-            saveHit(request);
+            saveEventHit(request);
         } else {
             saveTestHit("/events/" + eventId);
         }
@@ -434,7 +433,29 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    private void saveHit(HttpServletRequest request) {
+    private void saveEventListHit(HttpServletRequest request) {
+        try {
+            EndpointHitDto hitDto = EndpointHitDto.builder()
+                    .app(APP_NAME)
+                    .uri("/events")
+                    .ip(request.getRemoteAddr())
+                    .timestamp(LocalDateTime.now())
+                    .build();
+
+            log.info("Отправка хита для списка событий: app={}, uri={}, ip={}",
+                    hitDto.getApp(), hitDto.getUri(), hitDto.getIp());
+
+            statsClient.hit(hitDto);
+            log.info("Хит для списка событий успешно отправлен");
+        } catch (Exception e) {
+            log.error("Ошибка при отправке хита для списка событий: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Сохраняет хит для конкретного события (эндпоинт /events/{id})
+     */
+    private void saveEventHit(HttpServletRequest request) {
         try {
             EndpointHitDto hitDto = EndpointHitDto.builder()
                     .app(APP_NAME)
@@ -443,13 +464,13 @@ public class EventServiceImpl implements EventService {
                     .timestamp(LocalDateTime.now())
                     .build();
 
-            log.info("Отправка хита в статистику: app={}, uri={}, ip={}, timestamp={}",
-                    hitDto.getApp(), hitDto.getUri(), hitDto.getIp(), hitDto.getTimestamp());
+            log.info("Отправка хита для события: app={}, uri={}, ip={}",
+                    hitDto.getApp(), hitDto.getUri(), hitDto.getIp());
 
             statsClient.hit(hitDto);
-            log.info("Хит успешно отправлен");
+            log.info("Хит для события успешно отправлен");
         } catch (Exception e) {
-            log.error("Ошибка при отправке хита в статистику: {}", e.getMessage(), e);
+            log.error("Ошибка при отправке хита для события: {}", e.getMessage(), e);
         }
     }
 
