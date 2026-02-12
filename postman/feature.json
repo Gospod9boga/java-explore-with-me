@@ -30,7 +30,11 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/admin/users",
+        "url": {
+          "raw": "{{baseUrl}}/admin/users",
+          "host": ["{{baseUrl}}"],
+          "path": ["admin", "users"]
+        },
         "body": {
           "mode": "raw",
           "raw": "{\"name\": \"Test User\", \"email\": \"test@example.com\"}"
@@ -63,7 +67,11 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/admin/categories",
+        "url": {
+          "raw": "{{baseUrl}}/admin/categories",
+          "host": ["{{baseUrl}}"],
+          "path": ["admin", "categories"]
+        },
         "body": {
           "mode": "raw",
           "raw": "{\"name\": \"Test Category\"}"
@@ -82,6 +90,11 @@
               "});",
               "",
               "var jsonData = pm.response.json();",
+              "pm.test(\"Event has id\", function () {",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData.id).to.not.be.undefined;",
+              "});",
+              "",
               "pm.collectionVariables.set('eventId', jsonData.id);",
               "console.log('Event created with ID:', jsonData.id);"
             ]
@@ -96,10 +109,14 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/users/{{userId}}/events",
+        "url": {
+          "raw": "{{baseUrl}}/users/{{userId}}/events",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "{{userId}}", "events"]
+        },
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"annotation\": \"Тестовое событие для рейтинга\",\n    \"category\": {{categoryId}},\n    \"description\": \"Описание тестового события\",\n    \"eventDate\": \"2025-12-31 15:00:00\",\n    \"location\": {\"lat\": 55.7558, \"lon\": 37.6176},\n    \"paid\": false,\n    \"participantLimit\": 0,\n    \"requestModeration\": false,\n    \"title\": \"Тестовое событие\"\n}"
+          "raw": "{\n    \"annotation\": \"Тестовое событие для рейтинга\",\n    \"category\": {{categoryId}},\n    \"description\": \"Описание тестового события\",\n    \"eventDate\": \"2030-12-31 15:00:00\",\n    \"location\": {\"lat\": 55.7558, \"lon\": 37.6176},\n    \"paid\": false,\n    \"participantLimit\": 0,\n    \"requestModeration\": false,\n    \"title\": \"Тестовое событие\"\n}"
         }
       }
     },
@@ -112,6 +129,11 @@
             "exec": [
               "pm.test(\"Status code is 200\", function () {",
               "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var jsonData = pm.response.json();",
+              "pm.test(\"Event is published\", function () {",
+              "    pm.expect(jsonData.state).to.equal('PUBLISHED');",
               "});"
             ]
           }
@@ -125,7 +147,11 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/admin/events/{{eventId}}",
+        "url": {
+          "raw": "{{baseUrl}}/admin/events/{{eventId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["admin", "events", "{{eventId}}"]
+        },
         "body": {
           "mode": "raw",
           "raw": "{\"stateAction\": \"PUBLISH_EVENT\"}"
@@ -150,7 +176,8 @@
               "    pm.expect(jsonData).to.have.property('rating');",
               "});",
               "",
-              "pm.collectionVariables.set('likesCount', jsonData.likes);"
+              "pm.collectionVariables.set('likesCount', jsonData.likes);",
+              "console.log('Likes after rating:', jsonData.likes);"
             ]
           }
         }
@@ -163,7 +190,11 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/users/{{userId}}/events/{{eventId}}/ratings",
+        "url": {
+          "raw": "{{baseUrl}}/users/{{userId}}/events/{{eventId}}/ratings",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "{{userId}}", "events", "{{eventId}}", "ratings"]
+        },
         "body": {
           "mode": "raw",
           "raw": "{\"isPositive\": true}"
@@ -183,6 +214,9 @@
               "",
               "var jsonData = pm.response.json();",
               "pm.test(\"Rating is correct\", function () {",
+              "    pm.expect(jsonData).to.have.property('likes');",
+              "    pm.expect(jsonData).to.have.property('dislikes');",
+              "    pm.expect(jsonData).to.have.property('rating');",
               "    pm.expect(jsonData.likes).to.be.at.least(1);",
               "});",
               "",
@@ -202,7 +236,11 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/events/{{eventId}}/rating"
+        "url": {
+          "raw": "{{baseUrl}}/events/{{eventId}}/rating",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "{{eventId}}", "rating"]
+        }
       }
     },
     {
@@ -240,14 +278,24 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/events/top?size=10"
+        "url": {
+          "raw": "{{baseUrl}}/events/top?size=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "top"],
+          "query": [
+            {
+              "key": "size",
+              "value": "10"
+            }
+          ]
+        }
       }
     }
   ],
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8080"
+      "value": "http://ewm-service:8080"
     },
     {
       "key": "userId",
