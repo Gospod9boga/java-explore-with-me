@@ -6,7 +6,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.statsclient.config.StatsClientConfig;
 import ru.practicum.statsdto.EndpointHitDto;
 import ru.practicum.statsdto.ViewStatsDto;
@@ -49,26 +48,26 @@ public class StatsClientImpl implements StatsClient {
                                        List<String> uris,
                                        boolean unique) {
         try {
-            UriComponentsBuilder builder = UriComponentsBuilder
-                    .fromHttpUrl(config.getUrl() + "/stats")
-                    .queryParam("start", start.format(FORMATTER))
-                    .queryParam("end", end.format(FORMATTER))
-                    .queryParam("unique", unique);
+            StringBuilder urlBuilder = new StringBuilder(config.getUrl() + "/stats");
+            urlBuilder.append("?start=").append(start.format(FORMATTER));
+            urlBuilder.append("&end=").append(end.format(FORMATTER));
+            urlBuilder.append("&unique=").append(unique);
 
             if (uris != null && !uris.isEmpty()) {
                 for (String uri : uris) {
-                    builder.queryParam("uris", uri);
+                    urlBuilder.append("&uris=").append(uri);
                 }
             }
 
-            String url = builder.build().encode().toUriString();
+            String url = urlBuilder.toString();
             log.info("Запрос статистики: {}", url);
 
             ResponseEntity<List<ViewStatsDto>> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<List<ViewStatsDto>>() {}
+                    new ParameterizedTypeReference<List<ViewStatsDto>>() {
+                    }
             );
 
             List<ViewStatsDto> stats = response.getBody();
