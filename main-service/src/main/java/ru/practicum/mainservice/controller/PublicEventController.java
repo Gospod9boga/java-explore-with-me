@@ -1,5 +1,6 @@
 package ru.practicum.mainservice.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -41,8 +42,8 @@ public class PublicEventController {
     }
 
     @GetMapping("/{id}")
-    public EventFullDto getPublicEvent(@PathVariable Long id) {
+    public EventFullDto getPublicEvent(@PathVariable Long id, HttpServletRequest request) {
         log.info("GET /events/{} - получение публичного события", id);
-        return eventService.getPublicEventById(id);
+        return eventService.getPublicEventById(id, request);
     }
 }
