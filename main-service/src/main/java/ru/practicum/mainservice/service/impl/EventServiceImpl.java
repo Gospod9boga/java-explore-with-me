@@ -309,11 +309,6 @@ public class EventServiceImpl implements EventService {
         return dto;
     }
 
-    @Override
-    public EventFullDto getPublicEventById(Long eventId) {
-        return getPublicEventById(eventId, null);
-    }
-
     private void validateEventDate(LocalDateTime eventDate, int hoursBefore, String errorMessage) {
         if (eventDate.isBefore(LocalDateTime.now().plusHours(hoursBefore))) {
             throw new EventValidationException(errorMessage);

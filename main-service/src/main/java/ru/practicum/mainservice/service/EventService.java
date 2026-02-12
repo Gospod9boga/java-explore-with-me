@@ -6,6 +6,7 @@ import ru.practicum.mainservice.dto.request.UpdateEventUserRequest;
 import ru.practicum.mainservice.dto.response.EventFullDto;
 import ru.practicum.mainservice.dto.response.EventShortDto;
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -37,5 +38,4 @@ public interface EventService {
                                         Boolean onlyAvailable, String sort,
                                         int from, int size);
 
-    EventFullDto getPublicEventById(Long eventId);
 }
