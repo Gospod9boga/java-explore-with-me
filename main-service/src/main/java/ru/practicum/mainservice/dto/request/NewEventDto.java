@@ -3,6 +3,7 @@ package ru.practicum.mainservice.dto.request;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import ru.practicum.mainservice.dto.LocationDto;
 import ru.practicum.mainservice.model.entity.Event;
 
 import java.time.LocalDateTime;
@@ -27,7 +28,7 @@ public class NewEventDto {
     private LocalDateTime eventDate;
 
     @NotNull(message = "Location cannot be null")
-    private Event.Location location;
+    private LocationDto location;
 
     private Boolean paid = false;
 

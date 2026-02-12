@@ -4,8 +4,7 @@ import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import ru.practicum.mainservice.model.entity.Event;
-
+import ru.practicum.mainservice.dto.LocationDto;
 import java.time.LocalDateTime;
 
 @Data
@@ -22,7 +21,7 @@ public class UpdateEventUserRequest {
     @Future(message = "Event date must be in the future")
     private LocalDateTime eventDate;
 
-    private Event.Location location;
+    private LocationDto location;
 
     private Boolean paid;
 

@@ -2,6 +2,7 @@ package ru.practicum.mainservice.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import ru.practicum.mainservice.dto.LocationDto;
 import ru.practicum.mainservice.dto.request.NewEventDto;
 import ru.practicum.mainservice.dto.request.UpdateEventAdminRequest;
 import ru.practicum.mainservice.dto.request.UpdateEventUserRequest;
@@ -74,12 +75,12 @@ public class EventMapper {
         return Event.builder()
                 .annotation(newEventDto.getAnnotation())
                 .category(category)
-                .confirmedRequests(0L)  // ✅ При создании - 0
+                .confirmedRequests(0L)
                 .createdOn(LocalDateTime.now())
                 .description(newEventDto.getDescription())
                 .eventDate(newEventDto.getEventDate())
                 .initiator(initiator)
-                .location(newEventDto.getLocation())
+                .location(toEventLocation(newEventDto.getLocation()))
                 .paid(newEventDto.getPaid() != null ? newEventDto.getPaid() : false)
                 .participantLimit(newEventDto.getParticipantLimit() != null ? newEventDto.getParticipantLimit() : 0)
                 .requestModeration(newEventDto.getRequestModeration() != null ? newEventDto.getRequestModeration() : true)
@@ -107,7 +108,7 @@ public class EventMapper {
         }
 
         if (request.getLocation() != null) {
-            event.setLocation(request.getLocation());
+            event.setLocation(toEventLocation(request.getLocation()));
         }
 
         if (request.getPaid() != null) {
@@ -125,7 +126,6 @@ public class EventMapper {
         if (request.getTitle() != null) {
             event.setTitle(request.getTitle());
         }
-
     }
 
     public void updateEventFromAdminRequest(UpdateEventAdminRequest request, Event event) {
@@ -146,7 +146,7 @@ public class EventMapper {
         }
 
         if (request.getLocation() != null) {
-            event.setLocation(request.getLocation());
+            event.setLocation(toEventLocation(request.getLocation()));
         }
 
         if (request.getPaid() != null) {
@@ -164,7 +164,6 @@ public class EventMapper {
         if (request.getTitle() != null) {
             event.setTitle(request.getTitle());
         }
-
     }
 
     private EventFullDto.Location toLocationDto(Event.Location location) {
@@ -176,5 +175,15 @@ public class EventMapper {
         dto.setLat(location.getLat());
         dto.setLon(location.getLon());
         return dto;
+    }
+
+    private Event.Location toEventLocation(LocationDto locationDto) {
+        if (locationDto == null) {
+            return null;
+        }
+        return Event.Location.builder()
+                .lat(locationDto.getLat())
+                .lon(locationDto.getLon())
+                .build();
     }
 }
