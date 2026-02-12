@@ -23,7 +23,6 @@ import ru.practicum.mainservice.repository.EventRepository;
 import ru.practicum.mainservice.repository.UserRepository;
 import ru.practicum.mainservice.service.EventService;
 import ru.practicum.statsclient.StatsClient;
-import ru.practicum.statsdto.EndpointHitDto;
 import ru.practicum.statsdto.ViewStatsDto;
 
 import jakarta.persistence.criteria.Predicate;
